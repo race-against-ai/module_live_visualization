@@ -1,5 +1,5 @@
 # Copyright (C) 2022 NG:ITL
-# import the main file in the backend folder
+from live_visualization.live_visualization_backend.live_visualization import main
 
 if __name__ == "__main__":
-    print("enter you projects main function :)")
+    main()

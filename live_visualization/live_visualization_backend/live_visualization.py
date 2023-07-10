@@ -13,8 +13,8 @@ from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
 
-from live_visualization_backend.live_visualization_model import ModelLV
-from live_visualization_backend.timer_model import Model
+from live_visualization.live_visualization_backend.live_visualization_model import ModelLV
+from live_visualization.live_visualization_backend.timer_model import Model
 
 
 class State(IntEnum):
