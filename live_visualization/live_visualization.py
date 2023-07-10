@@ -13,8 +13,8 @@ from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
 
-from live_visualization.live_visualization_backend.live_visualization_model import ModelLV
-from live_visualization.live_visualization_backend.timer_model import Model
+from live_visualization.live_visualization_model import ModelLV
+from live_visualization.timer_model import Model
 
 
 class State(IntEnum):
@@ -35,7 +35,7 @@ LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
 
 
 def resource_path() -> Path:
-    base_path = getattr(sys, "_MEIPASS", os.getcwd())
+    base_path = getattr(sys, "_MEIPASS", Path(__file__).parent)
     return Path(base_path)
 
 
@@ -93,13 +93,14 @@ class LiveVisualization:
         self.timer_state = 0
 
     def run(self) -> None:
-        try:
-            if not self.engine.rootObjects():
-                sys.exit(-1)
-            print("started")
-            self.app.exec()
-        except:
-            pass
+        #try:
+        if not self.engine.rootObjects():
+            sys.exit(-1)
+        print("started")
+        self.app.exec()
+        #except:
+            #print("failed")
+            #pass
 
     def check_if_image_available_pynng(self) -> bool:
         socket_list = [self.image_sub.recv_fd]
