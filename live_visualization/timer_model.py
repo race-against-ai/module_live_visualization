@@ -19,11 +19,11 @@ class Model(QObject):
         self._sector_three_color = "grey"
 
         self._best_time = 27563000000
-        self._best_sector_one = 30
-        self._best_sector_two = 30
-        self._best_sector_three = 30
+        self._best_sector_one = 30.0
+        self._best_sector_two = 30.0
+        self._best_sector_three = 30.0
 
-        self._split_time = 0
+        self._split_time = 0.0
 
     def set_timestamp(self, timestamp_ns: int) -> None:
         timestamp_ms = timestamp_ns // (1000 * 1000)
@@ -100,11 +100,11 @@ class Model(QObject):
         self._sector_three_color = color
         self.sector_three_color_changed.emit()
 
-    def set_split_time(self, time: float) -> None:
+    def set_split_time(self, time) -> None:
         self._split_time = time
         self.split_time_changed.emit()
 
-    def update_best_sector(self, sector_number: int, sector_time: float) -> None:
+    def update_best_sector(self, sector_number: int, sector_time) -> None:
         match sector_number:
             case 1:
                 self._best_sector_one = sector_time
@@ -113,7 +113,7 @@ class Model(QObject):
             case 3:
                 self._best_sector_three = sector_time
 
-    def get_sector_time_difference(self, sector_number: int, sector_time: float) -> float:
+    def get_sector_time_difference(self, sector_number: int, sector_time: float):
         match sector_number:
             case 1:
                 return sector_time - self._best_sector_one
