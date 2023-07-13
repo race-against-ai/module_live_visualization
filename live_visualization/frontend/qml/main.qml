@@ -57,39 +57,23 @@ Window {
         }
     }
 
-//    Rectangle {
-////          x: window.width * 0.05
-////          y: window.height * 0.15
-//          anchors.left: parent.left
-//          anchors.top: logoVolkswagen.bottom
-//          anchors.leftMargin: parent.width * 0.015
-//          anchors.topMargin: window.height * 0.05
-//          width:  parent.width * 0.2
-//          height: window.height * 0.05
-//          color: "transparent"
-//          border.color: "red"
-//          border.width: 1
-//    }
-
     Rectangle {
+        color: "grey"
+        x: window.width / 2 - width / 2
         y: window.height * 0.01
-        anchors.horizontalCenter: parent.horizontalCenter
-
-        width:  textHeader.paintedWidth * 1.05
-        border.width: 1
-        border.color: "#80FFFFFF"
-        color: "#80FFFFFF"
         radius: 10
-
+        width: title.width * 1.1
+        height: window.height * 0.1
 
         Text {
-            id: textHeader
+            id: title
             font.family: fontLoader.name
-            anchors.fill: parent
             text: "Race Against AI"
-            font.pixelSize: window.height*0.08
-
-            }
+            color: "black"
+            x: parent.width / 2 - width / 2
+            y: parent.height / 2 - height / 2
+            font.pointSize: window.height * 0.05
+        }
     }
 
     Svg {
@@ -133,7 +117,6 @@ Window {
         id: sectors
         anchors.fill: parent
     }
-
 //Item {
 //	id: aiviewItem
 //	anchors.fill: parent
