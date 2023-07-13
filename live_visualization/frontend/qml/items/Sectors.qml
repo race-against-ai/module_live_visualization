@@ -55,7 +55,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 font.family: fontLoader.name
-                color: "white"
+                color: "black"
                 font.pixelSize: parent.height*0.1
                 text: "Aktuelle Bestzeit:"
             }
@@ -65,7 +65,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
                 font.family: fontLoader.name
-                color: "white"
+                color: "black"
                 font.pixelSize: parent.height*0.2
                // text: t_model.best_time
                 text: sectors.best_time
