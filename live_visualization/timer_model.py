@@ -66,7 +66,7 @@ class Model(QObject):
         seconds = (timestamp_ms // 1000) % 60
         minutes = (timestamp_ms // (1000 * 60)) % 60
 
-        return "%s:%s:%s" % (
+        return "%s:%s.%s" % (
             pad_left(str(minutes), 2),
             pad_left(str(seconds), 2),
             pad_left(str(millis), 3),

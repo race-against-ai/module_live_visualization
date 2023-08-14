@@ -1,0 +1,44 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+
+Item {
+    property var driverModel
+
+    height: (leaderboardBackgroundDrivers.height * 0.80 ) / 20
+    width: parent.width
+    x: parent.width * 0.05
+
+    Text {
+        text: {
+            try {
+                if(driverModel.place > 9) {
+                    return driverModel.place;
+                } else {
+                    return "0" + driverModel.place;
+                }
+            } catch(error) {
+                return "";
+            }
+        }
+        font.family: fontLoaderWide.name
+        font.pointSize: parent.height * 0.4
+        color: "white"
+        Layout.leftMargin: 10
+    }
+
+    Text {
+        text: {
+            try {
+                return driverModel.name.substring(0,3);
+            } catch(error) {
+                return "";
+            }
+        }
+        font.family: fontLoaderWide.name
+        font.pointSize: parent.height * 0.4
+        color: "white"
+        x: parent.width * 0.2
+    }
+
+}

@@ -1,0 +1,81 @@
+import QtQuick 2.0
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+
+Item {
+    anchors.fill: parent
+
+    Svg {
+        id: leaderboardHeader
+        source: "./../../images/svg/test_image_0_header.svg"
+        visible: true
+        y: parent.height / 2 - height / 2
+        x: parent.height * 0.01
+        fillMode: Image.PreserveAspectFit
+        height: parent.height * 0.9
+    }
+
+    Svg {
+        id: leaderboardBackgroundDrivers
+        source: "./../../images/svg/test_image_0_names.svg"
+        visible: true
+        x: parent.height * 0.01
+        y: parent.height / 2 - height / 2
+        fillMode: Image.PreserveAspectFit
+        height: parent.height * 0.9
+    }
+
+    Svg {
+        id: leaderboardBackgroundTimes
+        source: "./../../images/svg/test_image_0_times.svg"
+        visible: true
+        x: parent.height * 0.01
+        y: parent.height / 2 - height / 2
+        fillMode: Image.PreserveAspectFit
+        height: parent.height * 0.9
+    }
+
+    Svg {
+        id: leaderboardBackgroundBorder
+        source: "./../../images/svg/test_image_0_border.svg"
+        visible: true
+        x: parent.height * 0.01
+        y: parent.height / 2 - height / 2
+        fillMode: Image.PreserveAspectFit
+        height: parent.height * 0.9
+    }
+
+    Column {
+        id: leaderboardNames
+        spacing: 3
+        anchors.left: leaderboardBackgroundDrivers.left
+        anchors.right: leaderboardBackgroundDrivers.right
+        y: parent.height * 0.15
+
+        Repeater {
+            id: leaderboardNamesRepeater
+            model: leaderboard_model.leaderboard
+            Driver {
+                driverModel: modelData
+
+            }
+        }
+    }
+
+    Column {
+        id: leaderboardTimes
+        spacing: 3
+        anchors.left: leaderboardBackgroundDrivers.left
+        anchors.right: leaderboardBackgroundDrivers.right
+        y: parent.height * 0.15
+
+        Repeater {
+            id: leaderboardTimesRepeater
+            model: leaderboard_model.leaderboard
+            Times {
+                driverModel: modelData
+
+            }
+        }
+    }
+}

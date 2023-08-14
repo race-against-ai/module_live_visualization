@@ -23,7 +23,12 @@ Window {
 
     FontLoader {
             id: fontLoader
-            source: "../fonts/Exo-Bold.otf"
+            source: "../fonts/Formula1-Regular.otf"
+    }
+
+    FontLoader {
+        id: fontLoaderWide
+        source: "../fonts/Formula1-Bold.otf"
     }
 
     MouseArea {
@@ -67,7 +72,7 @@ Window {
 
         Text {
             id: title
-            font.family: fontLoader.name
+            font.family: fontLoaderWide.name
             text: "Race Against AI"
             color: "black"
             x: parent.width / 2 - width / 2
@@ -77,60 +82,25 @@ Window {
     }
 
     Svg {
-        id: logoVolkswagen
-        source: "./../images/img/Volkswagen_logo_2019.svg"
-//        x: parent.width - parent.width*0.99
-//        y: parent.height - parent.height*0.99
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.leftMargin: parent.width * 0.01
-        anchors.topMargin: parent.height * 0.01
-        fillMode: Image.PreserveAspectFit
-        height: parent.height * 0.09
-
-
-    }
-
-    Svg {
         id: logoAutostadt
         source: "./../images/img/Autostadt_Logo.svg"
-//        x: parent.width - parent.width*0.95
-//        y: parent.height - parent.height*0.99
-        anchors.top: logoVolkswagen.top
-        anchors.left: logoVolkswagen.right
-        anchors.leftMargin: parent.width * 0.01
+        x: parent.width * 0.98 - width
+        y: window.height * 0.01
         fillMode: Image.PreserveAspectFit
-        height: parent.height*0.09
-    }
-
-    Svg {
-        id: ngitl_logo
-        source: "./../images/img/ngitl_black.svg"
-        visible: true
-        anchors.top: parent.top
-        anchors.right: parent.right
-        fillMode: Image.PreserveAspectFit
-        height: parent.height * 0.09
+        height: parent.height*0.1
     }
 
     Sectors {
         id: sectors
         anchors.fill: parent
     }
-//Item {
-//	id: aiviewItem
-//	anchors.fill: parent
 
-//	AIView {
-//		id: aiview
-//		anchors.fill: parent
-//	}
-//}
-//    Text {
-//        id: test_text
-//        text: "test"
-//        visible: true
-//    }
+    Leaderboard {
+        id:leaderboardItem
+        anchors.fill: parent
+    }
+
+
 
     Connections {
         target: live_visualization_model

@@ -54,10 +54,10 @@ Item {
                 anchors.topMargin: parent.height * 0.025
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
-                font.family: fontLoader.name
+                font.family: fontLoaderWide.name
                 color: "black"
                 font.pixelSize: parent.height*0.1
-                text: "Aktuelle Bestzeit:"
+                text: "Aktuelle Bestzeit"
             }
             Text {
                 anchors.top: textHeader.bottom

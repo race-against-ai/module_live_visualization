@@ -13,7 +13,7 @@ from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
 
-from live_visualization.live_visualization_model import ModelLV
+from live_visualization.live_visualization_model import ModelLV, DriverModel, LeaderboardModel
 from live_visualization.timer_model import Model
 
 
@@ -32,6 +32,8 @@ IMAGE_DEPTH = 3
 IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/broker.ipc"
 
 LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
+
+LEADERBOARD_SUB_ADDRESS = "ipc:///tmp/RAAI/leaderboard.ipc"
 
 
 def resource_path() -> Path:
@@ -57,6 +59,8 @@ class LiveVisualization:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
         self.t_model = Model(0, 0, 0)
+        
+        self.leaderboard_model = LeaderboardModel()
 
         self.live_visualization_model = ModelLV()
 
@@ -68,6 +72,7 @@ class LiveVisualization:
 
         self.engine.rootContext().setContextProperty("t_model", self.t_model)
         self.engine.rootContext().setContextProperty("live_visualization_model", self.live_visualization_model)
+        self.engine.rootContext().setContextProperty("leaderboard_model", self.leaderboard_model)
         self.engine.load(resource_path() / "frontend/qml/main.qml")
 
         self.image_sub = pynng.Sub0()
@@ -78,11 +83,18 @@ class LiveVisualization:
         self.lap_sub.subscribe("")
         self.lap_sub.dial(LAPTIME_SUB_ADDRESS, block=False)
 
+        self.leaderboard_sub = pynng.Sub0()
+        self.leaderboard_sub.subscribe("")
+        self.leaderboard_sub.dial(LEADERBOARD_SUB_ADDRESS, block=False)
+
         self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
         self._lap_socket_notifier = QSocketNotifier(self.lap_sub.recv_fd, QSocketNotifier.Read)
         self._lap_socket_notifier.activated.connect(self.time_receiver)
+
+        self._leaderboard_socket_notifier = QSocketNotifier(self.leaderboard_sub.recv_fd, QSocketNotifier.Read)
+        self._leaderboard_socket_notifier.activated.connect(self.leaderboard_receiver)
 
         # timer for counting
         self.lapTimer = QTimer()
@@ -205,6 +217,14 @@ class LiveVisualization:
             case 3:
                 self.t_model.set_third_sector_color(color)
 
+    def leaderboard_receiver(self) -> None:
+        msg = self.leaderboard_sub.recv()
+        decoded_data: str = msg.decode()
+        i = decoded_data.find(" ")
+        decoded_data = decoded_data[i + 1 :]
+        data = json.loads(decoded_data)
+        
+        self.leaderboard_model.update_leaderboard(data)
 
 def main():
     print("starting visualizer...")
