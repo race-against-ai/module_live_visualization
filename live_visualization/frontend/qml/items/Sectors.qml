@@ -149,10 +149,19 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
+        Rectangle {
+            id: switchBackground
+            color: "grey"
+            radius: 10
+            opacity: 0.5
+            visible: false
+            anchors.fill: parent
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                console.log("test")
+                switchBackground.visible = true;  // Show the background during the click
                 if(sectorsBackground.x === sectors.width - sectors.width*0.35) {
                     xAnimation.to = window.width
                     opacityAnimation.to = 1
@@ -162,6 +171,19 @@ Item {
                 }
                 xAnimation.start()
                 opacityAnimation.start()
+
+                // Add a Timer to hide the background after a delay (e.g., 1 second)
+                switchBackgroundTimer.running = true;
+            }
+        }
+
+        Timer {
+            id: switchBackgroundTimer
+            interval: 100 // 1 second delay
+            running: false
+            onTriggered: {
+                switchBackground.visible = false;  // Hide the background
+                switchBackgroundTimer.running = false;
             }
         }
     }
