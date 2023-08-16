@@ -69,6 +69,7 @@ Window {
         radius: 10
         width: title.width * 1.1
         height: window.height * 0.1
+        opacity: 0.8
 
         Text {
             id: title

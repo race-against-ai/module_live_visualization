@@ -18,35 +18,18 @@ Item {
            }
 
     Svg {
+        id: sectorsBackground
         source: "../../images/svg_extracted_layers/sectors_body.svg"
         x: parent.width - parent.width*0.35
         y: parent.height - parent.height*0.3
         height: parent.height*0.2
         width: parent.width*0.3
+        visible: true
 
 
         Svg {
             source: "../../images/svg_extracted_layers/sectors_header.svg"
             anchors.fill: parent
-
-
-            MouseArea {
-
-                id: resetButtonMouseArea
-                x: 0
-                y: 0
-                width: parent.width
-                height:  parent.height
-
-                onClicked: {
-                    window.resetButtonClicked()
-                }
-                /*Rectangle{
-                    anchors.fill: parent
-                    color: "transparent"
-                    border.color: "red"
-                }*/
-            }
 
             Text {
                 id: textHeader
@@ -64,7 +47,7 @@ Item {
                 anchors.topMargin: parent.height * 0.15
                 horizontalAlignment: Text.AlignHCenter
                 anchors.fill: parent
-                font.family: fontLoader.name
+                font.family: fontLoaderWide.name
                 color: "black"
                 font.pixelSize: parent.height*0.2
                // text: t_model.best_time
@@ -74,7 +57,7 @@ Item {
 
         Text {
             id: time
-            font.family: fontLoader.name
+            font.family: fontLoaderWide.name
             visible: !deltaTimer.running
             color: "white"
             font.pixelSize: parent.height*0.2
@@ -85,24 +68,6 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             anchors.top: parent.top
             anchors.topMargin: parent.height * 0.45
-
-            MouseArea {
-
-                id: startStopButtonMouseArea
-                x: 0
-                y: 0
-                width: parent.width
-                height:  parent.height
-
-                onClicked: {
-                    window.startStopButtonClicked()
-                }
-                /*Rectangle{
-                    anchors.fill: parent
-                    color: "transparent"
-                    border.color: "red"
-                }*/
-            }
 
         }
 
@@ -165,4 +130,53 @@ Item {
         }
     }
   }
+
+    Svg {
+        id: track
+        source: "../../images/svg/holodeck_track_definition.svg"
+        height: parent.height * 0.4
+        fillMode: Image.PreserveAspectFit
+        y: window.height * 0.95 - height
+        x: window.width * 0.95 - width
+        opacity: 0
+    }
+
+    Svg {
+        id: switchButton
+        source: "../../images/svg/switch-horizontal.svg"
+        height: parent.height * 0.05
+        fillMode: Image.PreserveAspectFit
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                console.log("test")
+                if(sectorsBackground.x === sectors.width - sectors.width*0.35) {
+                    xAnimation.to = window.width
+                    opacityAnimation.to = 1
+                } else {
+                    xAnimation.to = sectors.width - sectors.width*0.35
+                    opacityAnimation.to = 0
+                }
+                xAnimation.start()
+                opacityAnimation.start()
+            }
+        }
+    }
+
+    PropertyAnimation {
+        id: xAnimation
+        target: sectorsBackground
+        property: "x"
+        duration: 500
+    }
+
+    PropertyAnimation {
+        id: opacityAnimation
+        target: track
+        property: "opacity"
+        duration: 500
+    }
 }

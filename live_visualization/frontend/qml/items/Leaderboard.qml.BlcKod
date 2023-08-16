@@ -3,19 +3,17 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
 Item {
-    id: leaderboardContainer
     anchors.fill: parent
-    property bool timeVisible: true
 
     MouseArea {
         anchors.fill: leaderboardContent
         onClicked: {
-            if(leaderboardContainer.timeVisible === false) {
+            if(timeText.visible === false) {
+                timeText.visible = true;
                 widthAnimation.to = 0;
-                leaderboardContainer.timeVisible = true;
             } else {
+                timeText.visible = false;
                 widthAnimation.to = window.height * 0.21;
-                leaderboardContainer.timeVisible = false;
             }
             widthAnimation.start();
         }

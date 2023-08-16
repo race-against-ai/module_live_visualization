@@ -2,7 +2,6 @@ import QtQuick 2.0
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-
 Item {
     property var driverModel
 
@@ -12,6 +11,7 @@ Item {
     x: parent.width * 0.55
 
     Text {
+        id: timeText
         text: {
             try {
                 return driverModel.formatted_time;
@@ -20,11 +20,16 @@ Item {
             }
         }
         font.family: fontLoader.name
-        font.pointSize: parent.height * 0.35
-        color: "white"
+        font.pointSize: {
+            try {
+                return parent.height * 0.35;
+            } catch(error) {
+                return 1;
+            }
+        }
+        color: newTimeTimer.running ? "green" : "white"
         Layout.alignment: Qt.AlignHCenter
         Layout.fillWidth: true
-        visible: !newTimeTimer.running
         Layout.leftMargin: 10
     }
 
@@ -41,5 +46,9 @@ Item {
             newTimeTimer.start()
             console.log("Signal received")
         }
+    }
+
+    Component.onCompleted: {
+        console.log("Created")
     }
 }

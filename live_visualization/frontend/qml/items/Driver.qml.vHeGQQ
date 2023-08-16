@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.15
 
 Item {
     property var driverModel
+    property bool timeVisible
 
     height: (leaderboardBackgroundDrivers.height * 0.80 ) / 20
     width: parent.width
@@ -34,7 +35,7 @@ Item {
     }
 
     Text {
-        text: leaderboardContainer.timeVisible ? driverModel.name.substring(0,3) : driverModel.name
+        text: driverModel.name.substring(0,3)
 
         font.family: fontLoaderWide.name
         font.pointSize: {
@@ -66,14 +67,8 @@ Item {
             }
         }
         color: "white"
+        visible: timeVisible
         x: parent.width * 0.5
-        opacity: leaderboardContainer.timeVisible ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 500
-            }
-        }
     }
 
 }

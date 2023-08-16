@@ -12,10 +12,8 @@ Item {
         onClicked: {
             if(leaderboardContainer.timeVisible === false) {
                 widthAnimation.to = 0;
-                leaderboardContainer.timeVisible = true;
             } else {
                 widthAnimation.to = window.height * 0.21;
-                leaderboardContainer.timeVisible = false;
             }
             widthAnimation.start();
         }

@@ -62,26 +62,26 @@ class LeaderboardModel(QObject):
     
     def clear_leaderboard(self) -> None:
         self._leaderboard_entries = []
-
-    def make_drivers_unique(self, pre_list: list) -> list:
-        unique_dict = {}
-
-        for obj in pre_list:
-            if obj.name in unique_dict:
-                if obj.time < unique_dict[obj.name].time:
-                    unique_dict[obj.name] = obj
-            else:
-                unique_dict[obj.name] = obj
-        
-        return list(unique_dict.values())
+    
+    def check_if_driver_exists(self, driver_name: str) -> bool:
+        for obj in self._leaderboard_entries:
+            if obj.name == driver_name:
+                return True
+        return False
     
     def update_leaderboard(self, leaderboard: dict) -> None:
         pre_leaderboard = self._leaderboard_entries
 
         for entries in leaderboard:
-            pre_leaderboard.append(DriverModel(entries, leaderboard[entries]))
-        
-        self._leaderboard_entries = self.make_drivers_unique(pre_leaderboard)
+            if not self.check_if_driver_exists(entries):
+                pre_leaderboard.append(DriverModel(entries, leaderboard[entries]))
+            else:
+                for obj in self._leaderboard_entries:
+                    if obj.name == entries:
+                        if obj.time > leaderboard[entries]:
+                            obj.time = leaderboard[entries]
+                            print("updated time")
+                            break
 
         #_leaderboard_entries sorted by dict value from lowest to highest
         self._leaderboard_entries.sort(key=lambda x: x.time)
