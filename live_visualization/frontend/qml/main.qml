@@ -96,7 +96,7 @@ Window {
         anchors.fill: parent
     }
 
-    Leaderboard {
+    LeaderboardNew {
         id:leaderboardItem
         anchors.fill: parent
     }

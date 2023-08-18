@@ -51,17 +51,23 @@ class DriverModel(QObject):
 
 class LeaderboardModel(QObject):
     leaderboard_updated = Signal(name="leaderboard_updated")
+    new_driver_added = Signal(name="new_driver_added")
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._leaderboard_entries: List[DriverModel] = \
-            [DriverModel("Driver1", 5.32, 1), DriverModel("Driver2", 7.45, 2), DriverModel("Driver3", 8.43, 3)]
+            []
+        self._current_driver: DriverModel = None
         
     def get_leaderboard(self) -> list:
         return self._leaderboard_entries
     
     def clear_leaderboard(self) -> None:
         self._leaderboard_entries = []
+
+    def set_new_driver(self, driver_object: DriverModel) -> None:
+        self._current_driver = driver_object
+        self.new_driver_added.emit()
     
     def check_if_driver_exists(self, driver_name: str) -> bool:
         for obj in self._leaderboard_entries:
@@ -74,7 +80,10 @@ class LeaderboardModel(QObject):
 
         for entries in leaderboard:
             if not self.check_if_driver_exists(entries):
-                pre_leaderboard.append(DriverModel(entries, leaderboard[entries]))
+                driver = DriverModel(entries, leaderboard[entries])
+                pre_leaderboard.append(driver)
+                self.set_new_driver(driver)
+                print("new driver added")
             else:
                 for obj in self._leaderboard_entries:
                     if obj.name == entries:
@@ -91,10 +100,11 @@ class LeaderboardModel(QObject):
 
         #add place to each entry
         for i in range(len(self._leaderboard_entries)):
-            self._leaderboard_entries[i]._place = i + 1
+            self._leaderboard_entries[i].set_place(i + 1)
         self.leaderboard_updated.emit()
 
     leaderboard = Property(list, get_leaderboard, update_leaderboard, notify=leaderboard_updated)
+    new_driver = Property(DriverModel, lambda self: self._current_driver, notify=new_driver_added)
 
 
 
