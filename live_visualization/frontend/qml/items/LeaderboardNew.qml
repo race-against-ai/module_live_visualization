@@ -100,6 +100,7 @@ Item {
                     driverModel: leaderboard_model.new_driver
             })
             leaderboardContent.elementList.push(elem)
+            leaderboardContent.rearrangeElements()
         }
     }
 }

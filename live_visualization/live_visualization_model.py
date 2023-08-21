@@ -8,6 +8,7 @@ class DriverModel(QObject):
     timeChanged = Signal()
     place_changed = Signal(name="place_changed")
     formatted_time_changed = Signal(name="formatted_time_changed")
+    time_improved = Signal(name="time_improved")
 
     def __init__(self, name: str, time: float, place: int = None, formatted_time: str = "") -> None:
         QObject.__init__(self)
@@ -89,6 +90,7 @@ class LeaderboardModel(QObject):
                     if obj.name == entries:
                         if obj.time > leaderboard[entries]:
                             obj.time = leaderboard[entries]
+                            obj.time_improved.emit()
                             print("updated time")
                             break
 
@@ -100,6 +102,8 @@ class LeaderboardModel(QObject):
 
         #add place to each entry
         for i in range(len(self._leaderboard_entries)):
+            if(self._leaderboard_entries[i].place == (i + 1)):
+                continue
             self._leaderboard_entries[i].set_place(i + 1)
         self.leaderboard_updated.emit()
 

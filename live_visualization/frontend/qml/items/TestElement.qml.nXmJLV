@@ -47,11 +47,12 @@ AnimatedColumnElement {
 
     function foo() {
         moveToPosition(driverModel.place - 1)
-        console.log(driverModel.place)
+        console.log("test")
     }
 
     Component.onCompleted: {
         driverModel.place_changed.connect(foo)
+        animatedColumnElement.position = driverModel.place
     }
 
 //    Connections {
