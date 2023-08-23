@@ -76,35 +76,44 @@ class LeaderboardModel(QObject):
                 return True
         return False
     
+    def set_positions(self) -> None:
+        for i in range(len(self._leaderboard_entries)):
+            if(self._leaderboard_entries[i].place == (i + 1)):
+                continue
+            self._leaderboard_entries[i].set_place(i + 1)
+    
     def update_leaderboard(self, leaderboard: dict) -> None:
         pre_leaderboard = self._leaderboard_entries
 
         for entries in leaderboard:
             if not self.check_if_driver_exists(entries):
                 driver = DriverModel(entries, leaderboard[entries])
-                pre_leaderboard.append(driver)
-                self.set_new_driver(driver)
-                print("new driver added")
+                self._leaderboard_entries.append(driver)
+                self._leaderboard_entries.sort(key=lambda x: x.time)
+                self.set_positions()
+                if len(self._leaderboard_entries) > 20:
+                    if driver.time < pre_leaderboard[19].time:
+                        self.set_new_driver(driver)
+                        print("new driver added")
+                else:
+                    self.set_new_driver(driver)
+                    print("new driver added")
             else:
                 for obj in self._leaderboard_entries:
                     if obj.name == entries:
                         if obj.time > leaderboard[entries]:
                             obj.time = leaderboard[entries]
-                            obj.time_improved.emit()
                             print("updated time")
+                            self._leaderboard_entries.sort(key=lambda x: x.time)
+                            self.set_positions()
                             break
 
         #_leaderboard_entries sorted by dict value from lowest to highest
         self._leaderboard_entries.sort(key=lambda x: x.time)
-
+        self.set_positions()
         #delete all entries with index > 20
         del self._leaderboard_entries[20:]
 
-        #add place to each entry
-        for i in range(len(self._leaderboard_entries)):
-            if(self._leaderboard_entries[i].place == (i + 1)):
-                continue
-            self._leaderboard_entries[i].set_place(i + 1)
         self.leaderboard_updated.emit()
 
     leaderboard = Property(list, get_leaderboard, update_leaderboard, notify=leaderboard_updated)

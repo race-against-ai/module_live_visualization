@@ -73,8 +73,9 @@ Item {
     AnimatedColumn {
         id: leaderboardContent
 
-        width: leaderboardBackgroundTimes.width
-        y: 10
+        anchors.left: leaderboardBackgroundDrivers.left
+        anchors.right: leaderboardBackgroundDrivers.right
+        y: parent.height * 0.15
 
         anchors.horizontalCenter: leaderboardBackgroundTimes.horizontalCenter
     }
@@ -86,21 +87,32 @@ Item {
         duration: 500
     }
 
+    Component.onCompleted: {
+
+        var comp = Qt.createComponent("TestElement.qml");
+
+        for (var i = 1; i <= 20; i++)  {
+            console.log("Add AnimatedColumnElement")
+
+            var elem = comp.createObject(leaderboardContent, {
+                width: leaderboardContent.width,
+                height: (leaderboardBackgroundDrivers.height * 0.85) / 20
+            })
+            leaderboardContent.elementList.push(elem)
+        }
+    }
+
 
     Connections {
         target: leaderboard_model
 
         onNew_driver_added: {
-            var comp = Qt.createComponent("TestElement.qml")
-
-            var elem = comp.createObject(leaderboardContent, {
-                    text: leaderboard_model.new_driver.name,
-                    width: 100,
-                    height: 50,
-                    driverModel: leaderboard_model.new_driver
-            })
-            leaderboardContent.elementList.push(elem)
-            leaderboardContent.rearrangeElements()
+            var lastElement = leaderboardContent.elementList[leaderboardContent.elementList.length - 1];
+            if (lastElement !== null) {
+                lastElement.driverModel = leaderboard_model.new_driver;
+                lastElement.foo();
+            }
         }
     }
+
 }
