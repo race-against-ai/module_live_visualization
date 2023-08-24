@@ -8,6 +8,20 @@ def pad_left(string: str, length: int, padchar: str = "0") -> str:
 
 
 class Model(QObject):
+    millis_changed = Signal(name="millis_changed")
+    seconds_changed = Signal(name="seconds_changed")
+    minutes_changed = Signal(name="minutes_changed")
+    best_time_changed = Signal(name="best_time_changed")
+    start_stop_button_clicked = Signal(name="start_stop_button_clicked")
+    reset_button_clicked = Signal(name="reset_button_clicked")
+    state_changed = Signal(name="state_changed")
+    sector_one_color_changed = Signal(name="sector_one_color_changed")
+    sector_two_color_changed = Signal(name="sector_two_color_changed")
+    sector_three_color_changed = Signal(name="sector_three_color_changed")
+    split_time_changed = Signal(name="split_time_changed")
+    trigger_delta_signal = Signal(name="trigger_delta_signal")
+
+
     def __init__(self, millis: int, seconds: int, minutes: int) -> None:
         QObject.__init__(self)
         self._millis = millis
@@ -133,53 +147,6 @@ class Model(QObject):
         print("Signal emitted")
         self.trigger_delta_signal.emit()
 
-    @Signal
-    def millis_changed(self) -> None:
-        pass
-
-    @Signal
-    def seconds_changed(self) -> None:
-        pass
-
-    @Signal
-    def minutes_changed(self) -> None:
-        pass
-
-    @Signal
-    def best_time_changed(self) -> None:
-        pass
-
-    @Signal
-    def start_stop_button_clicked(self) -> None:
-        pass
-
-    @Signal
-    def reset_button_clicked(self) -> None:
-        pass
-
-    @Signal
-    def state_changed(self) -> None:
-        pass
-
-    @Signal
-    def sector_one_color_changed(self) -> None:
-        pass
-
-    @Signal
-    def sector_two_color_changed(self) -> None:
-        pass
-
-    @Signal
-    def sector_three_color_changed(self) -> None:
-        pass
-
-    @Signal
-    def split_time_changed(self) -> None:
-        pass
-
-    @Signal
-    def trigger_delta_signal(self) -> None:
-        pass
 
     millis = Property(int, get_millis, set_millis, notify=millis_changed)
     seconds = Property(int, get_seconds, set_seconds, notify=seconds_changed)

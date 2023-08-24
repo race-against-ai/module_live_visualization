@@ -10,14 +10,14 @@ AnimatedColumnElement {
 
     property var driverModel
 
-    Rectangle {
-        id: backgroundRectangle
+//    Rectangle {
+//        id: backgroundRectangle
 
-        color: movingUp ? activeColor : inactiveColor
-        anchors.fill: parent
+//        color: movingUp ? activeColor : inactiveColor
+//        anchors.fill: parent
 
-        radius: 10
-    }
+//        radius: 10
+//    }
 
 
     Text {
