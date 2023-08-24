@@ -65,7 +65,19 @@ AnimatedColumnElement {
         font.pointSize: parent.height * 0.35
         font.family: fontLoaderWide.name
         x: parent.width / 2
-        color: "white"
+        color: {
+            if(colorTimer.running){
+                if(driverModel.place === 1) {
+                    return "purple";
+                }
+                else {
+                    return "green";
+                }
+            }
+            else {
+                return "white";
+            }
+        }
     }
 
 //    Text {
@@ -89,6 +101,20 @@ AnimatedColumnElement {
             if((driverModel.place - 1) < position) {
                 moveToPosition(driverModel.place - 1)
             }
+        }
+    }
+
+    Timer {
+        id: colorTimer
+        running: false
+        interval: 1500
+        repeat: false
+    }
+
+    Connections {
+        target: driverModel
+        onTime_changed: {
+            colorTimer.start()
         }
     }
 

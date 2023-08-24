@@ -5,7 +5,7 @@ from typing import List
 
 class DriverModel(QObject):
     name_changed = Signal(name="name_changed")
-    timeChanged = Signal()
+    time_changed = Signal()
     place_changed = Signal(name="place_changed")
     formatted_time_changed = Signal(name="formatted_time_changed")
     time_improved = Signal(name="time_improved")
@@ -38,14 +38,14 @@ class DriverModel(QObject):
 
     def set_time(self, time: float) -> None:
         self._time = time
-        self.timeChanged.emit()
+        self.time_changed.emit()
 
     def set_place(self, place: int) -> None:
         self._place = place
         self.place_changed.emit()
 
     name = Property(str, get_name, set_name, notify=name_changed)
-    time = Property(float, get_time, set_time, notify=timeChanged)
+    time = Property(float, get_time, set_time, notify=time_changed)
     place = Property(int, get_place, set_place, notify=place_changed)
     formatted_time = Property(str, get_formatted_time, notify=formatted_time_changed)
 
