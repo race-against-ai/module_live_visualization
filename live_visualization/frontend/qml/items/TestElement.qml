@@ -10,17 +10,9 @@ AnimatedColumnElement {
 
     property var driverModel
 
-//    Rectangle {
-//        id: backgroundRectangle
-
-//        color: movingUp ? activeColor : inactiveColor
-//        anchors.fill: parent
-
-//        radius: 10
-//    }
-
 
     Text {
+        id: positionText
         text: {
             try {
                 return driverModel.place;
@@ -37,6 +29,7 @@ AnimatedColumnElement {
     }
 
     Text {
+        id: nameText
         text: {
             try {
                 return driverModel.name.substring(0,3);
@@ -80,6 +73,38 @@ AnimatedColumnElement {
         }
     }
 
+    Svg {
+        id: improvementSymbol
+        source: "./../../images/svg/improvement_symbol.svg"
+        height: parent.height * 0.25
+        fillMode: Image.PreserveAspectFit
+        x: parent.width * 0.05
+        anchors.bottom: positionText.top
+        opacity: improvementTimer.running ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 125
+            }
+        }
+    }
+
+    Svg {
+        id: declineSymbol
+        source: "./../../images/svg/decline_symbol.svg"
+        height: parent.height * 0.25
+        fillMode: Image.PreserveAspectFit
+        x: parent.width * 0.05
+        anchors.top: positionText.bottom
+        opacity: declineTimer.running ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 125
+            }
+        }
+    }
+
 //    Text {
 //        anchors.left: numberText.right
 //        font.pixelSize: 40
@@ -92,16 +117,23 @@ AnimatedColumnElement {
         onClicked: parent.clicked()
     }
 
-    function clicked() {
-        moveToPosition(0)
-    }
-
-    function foo() {
+    function update_position() {
         if((driverModel.place - 1)!== position) {
             if((driverModel.place - 1) < position) {
                 moveToPosition(driverModel.place - 1)
+                improvementTimer.start()
+            }
+            else {
+                declineTimer.start()
             }
         }
+        else {
+            declineTimer.start()
+        }
+    }
+
+    function start_color_timer() {
+        colorTimer.start()
     }
 
     Timer {
@@ -111,22 +143,23 @@ AnimatedColumnElement {
         repeat: false
     }
 
-    Connections {
-        target: driverModel
-        onTime_changed: {
-            colorTimer.start()
-        }
+    Timer {
+        id: declineTimer
+        running: false
+        interval: 1500
+        repeat: false
+    }
+
+    Timer {
+        id: improvementTimer
+        running: false
+        interval: 1500
+        repeat: false
     }
 
     onDriverModelChanged: {
-        driverModel.place_changed.connect(foo)
+        driverModel.place_changed.connect(update_position)
+        driverModel.time_changed.connect(start_color_timer)
     }
-
-//    Connections {
-//        target: driverModel
-//        onplace_changed: {
-//            moveToPosition(driverModel.place)
-//        }
-//    }
 
 }

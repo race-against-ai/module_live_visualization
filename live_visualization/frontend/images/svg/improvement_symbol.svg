@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.0"
+   width="933.30304pt"
+   height="608.97498pt"
+   viewBox="0 0 933.30304 608.97498"
+   preserveAspectRatio="xMidYMid"
+   id="svg1921"
+   sodipodi:docname="improvement_symbol.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1925">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient2440">
+      <stop
+         style="stop-color:#07b20a;stop-opacity:0.71818179;"
+         offset="0"
+         id="stop2436" />
+      <stop
+         style="stop-color:#025b02;stop-opacity:1;"
+         offset="1"
+         id="stop2438" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2440"
+       id="linearGradient2442"
+       x1="6705.25"
+       y1="4670.2425"
+       x2="12795"
+       y2="4670.2425"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview1923"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     showgrid="false"
+     inkscape:zoom="0.8246788"
+     inkscape:cx="622.06037"
+     inkscape:cy="406.21876"
+     inkscape:window-width="3840"
+     inkscape:window-height="2066"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1921" />
+  <metadata
+     id="metadata1913">
+Created by potrace 1.15, written by Peter Selinger 2001-2017
+</metadata>
+  <g
+     transform="matrix(0,0.1,0.1,0,-0.37272727,-670.525)"
+     fill="#000000"
+     stroke="none"
+     id="g1919"
+     inkscape:label="improvement">
+    <path
+       d="m 11280,9327 c -19,-7 -43,-18 -53,-23 -10,-6 -1022,-1014 -2248,-2240 C 7585,5671 6741,4820 6727,4795 c -29,-56 -29,-155 0,-210 27,-51 4497,-4520 4556,-4555 57,-34 162,-35 222,-3 50,27 1246,1225 1271,1273 13,24 19,57 19,105 0,58 -4,77 -27,115 -16,26 -679,697 -1588,1605 l -1561,1560 1550,1545 c 1105,1101 1556,1557 1571,1587 31,64 35,121 15,184 -16,51 -51,88 -634,672 -367,369 -632,627 -655,639 -49,25 -139,33 -186,15 z"
+       id="path1917"
+       style="fill-opacity:1;fill:url(#linearGradient2442)"
+       inkscape:label="improvement" />
+  </g>
+</svg>

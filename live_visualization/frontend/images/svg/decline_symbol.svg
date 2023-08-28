@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.0"
+   width="933.30304pt"
+   height="608.97498pt"
+   viewBox="0 0 933.30304 608.97498"
+   preserveAspectRatio="xMidYMid"
+   id="svg406"
+   sodipodi:docname="decline_symbol.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs410">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient1889">
+      <stop
+         style="stop-color:#ff0909;stop-opacity:0.78787881;"
+         offset="0"
+         id="stop1885" />
+      <stop
+         style="stop-color:#800000;stop-opacity:1;"
+         offset="1"
+         id="stop1887" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1889"
+       id="linearGradient1891"
+       x1="6705.25"
+       y1="4670.2427"
+       x2="12795"
+       y2="4670.2427"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview408"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     showgrid="false"
+     inkscape:zoom="0.8246788"
+     inkscape:cx="622.06037"
+     inkscape:cy="406.21876"
+     inkscape:window-width="3840"
+     inkscape:window-height="2066"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg406" />
+  <metadata
+     id="metadata398">
+Created by potrace 1.15, written by Peter Selinger 2001-2017
+</metadata>
+  <g
+     transform="matrix(0,-0.1,-0.1,0,933.67577,1279.5)"
+     fill="#000000"
+     stroke="none"
+     id="g404"
+     style="fill:#e00000;fill-opacity:1"
+     inkscape:label="decline">
+    <path
+       d="m 11280,9327 c -19,-7 -43,-18 -53,-23 -10,-6 -1022,-1014 -2248,-2240 C 7585,5671 6741,4820 6727,4795 c -29,-56 -29,-155 0,-210 27,-51 4497,-4520 4556,-4555 57,-34 162,-35 222,-3 50,27 1246,1225 1271,1273 13,24 19,57 19,105 0,58 -4,77 -27,115 -16,26 -679,697 -1588,1605 l -1561,1560 1550,1545 c 1105,1101 1556,1557 1571,1587 31,64 35,121 15,184 -16,51 -51,88 -634,672 -367,369 -632,627 -655,639 -49,25 -139,33 -186,15 z"
+       id="path402"
+       style="fill:url(#linearGradient1891);fill-opacity:1"
+       inkscape:label="decline" />
+  </g>
+</svg>

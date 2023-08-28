@@ -110,7 +110,7 @@ Item {
             var lastElement = leaderboardContent.elementList[leaderboardContent.elementList.length - 1];
             if (lastElement !== null) {
                 lastElement.driverModel = leaderboard_model.new_driver;
-                lastElement.foo();
+                lastElement.update_position();
             }
         }
     }

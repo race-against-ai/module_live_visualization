@@ -1,6 +1,7 @@
 # Copyright (C) 2023, NG:ITL
 from PySide6.QtCore import QObject, Signal, Property
 from typing import List
+from time import sleep
 
 
 class DriverModel(QObject):
@@ -106,7 +107,6 @@ class LeaderboardModel(QObject):
                             print("updated time")
                             self._leaderboard_entries.sort(key=lambda x: x.time)
                             self.set_positions()
-                            break
 
         #_leaderboard_entries sorted by dict value from lowest to highest
         self._leaderboard_entries.sort(key=lambda x: x.time)
