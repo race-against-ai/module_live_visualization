@@ -17,27 +17,30 @@ Item {
 		var newElementList = [];
 		var newElementPosition = 0;
 
-		for (var i = 0; i < dst; i++) {
-			var e = elementList[i]
+		if (elementList.length > 1) {
+			for (var i = 0; i < dst; i++) {
+				var e = elementList[i]
+				e.position = newElementPosition++
+				newElementList.push(e);
+			}
+
+			var e = elementList[src]
 			e.position = newElementPosition++
 			newElementList.push(e);
-		}
-
-		var e = elementList[src]
-		e.position = newElementPosition++
-		newElementList.push(e);
 
 
-		for (i = dst; i < elementList.length; i++) {
-			e = elementList[i];
-			if(e !== elementList[src]) {
-				e.position = newElementPosition++
-				newElementList.push(e)
+			for (i = dst; i < elementList.length; i++) {
+				e = elementList[i];
+				if(e !== elementList[src]) {
+					e.position = newElementPosition++
+					newElementList.push(e)
+				}
 			}
+
+			elementList = newElementList
 		}
 
 
-		elementList = newElementList
 		rearrangeElements();
 	}
 

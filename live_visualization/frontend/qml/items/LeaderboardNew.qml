@@ -89,17 +89,20 @@ Item {
 
     Component.onCompleted: {
 
-        var comp = Qt.createComponent("TestElement.qml");
+//        var comp = Qt.createComponent("TestElement.qml");
 
-        for (var i = 1; i <= 20; i++)  {
-            console.log("Add AnimatedColumnElement")
+//        for (var i = 1; i <= 20; i++)  {
+//            console.log("Add AnimatedColumnElement")
 
-            var elem = comp.createObject(leaderboardContent, {
-                width: leaderboardContent.width,
-                height: (leaderboardBackgroundDrivers.height * 0.85) / 20
-            })
-            leaderboardContent.elementList.push(elem)
-        }
+//            var elem = comp.createObject(leaderboardContent, {
+//				width: Qt.binding(function() { return leaderboardContent.width }),
+//				height: Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 }),
+//				position: i -1,
+//				visible: false
+//            })
+//            leaderboardContent.elementList.push(elem)
+//			leaderboardContent.rearrangeElements()
+//        }
     }
 
 
@@ -107,11 +110,23 @@ Item {
         target: leaderboard_model
 
         onNew_driver_added: {
-            var lastElement = leaderboardContent.elementList[leaderboardContent.elementList.length - 1];
-            if (lastElement !== null) {
-                lastElement.driverModel = leaderboard_model.new_driver;
-                lastElement.update_position();
-            }
+//            var lastElement = leaderboardContent.elementList[leaderboardContent.elementList.length - 1];
+//            if (lastElement !== null) {
+//                lastElement.driverModel = leaderboard_model.new_driver;
+//				lastElement.visible = true;
+//                lastElement.update_position();
+//            }
+			console.log("new driv");
+			var comp = Qt.createComponent("TestElement.qml");
+			var elem = comp.createObject(leaderboardContent, {
+				width: Qt.binding(function() { return leaderboardContent.width }),
+				height: Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 }),
+				position: leaderboardContent.elementList.length - 1,
+				visible: true,
+				driverModel: leaderboard_model.new_driver
+			})
+			leaderboardContent.elementList.push(elem)
+			leaderboardContent.rearrangeElements()
         }
     }
 

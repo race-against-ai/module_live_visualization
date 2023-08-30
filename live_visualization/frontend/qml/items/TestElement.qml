@@ -118,9 +118,11 @@ AnimatedColumnElement {
     }
 
     function update_position() {
+		console.log(driverModel.place)
+		moveToPosition(driverModel.place - 1)
         if((driverModel.place - 1)!== position) {
             if((driverModel.place - 1) < position) {
-                moveToPosition(driverModel.place - 1)
+
                 improvementTimer.start()
             }
             else {
