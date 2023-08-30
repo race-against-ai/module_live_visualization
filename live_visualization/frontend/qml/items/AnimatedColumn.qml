@@ -7,48 +7,37 @@ Item {
 	id: animatedColumn
 
 	property int margin: 0
-	property int rearrangementDuration: 500
+	property int arrangementDuration: 500
 	property list<AnimatedColumnElement> elementList
 
 
-	function moveElement(src, dst) {
-		console.log("Moving: "+ src + " -> " + dst);
+	function sortElements() {
 
 		var newElementList = [];
-		var newElementPosition = 0;
 
-		if (elementList.length > 1) {
-			for (var i = 0; i < dst; i++) {
-				var e = elementList[i]
-				e.position = newElementPosition++
-				newElementList.push(e);
-			}
-
-			var e = elementList[src]
-			e.position = newElementPosition++
-			newElementList.push(e);
-
-
-			for (i = dst; i < elementList.length; i++) {
-				e = elementList[i];
-				if(e !== elementList[src]) {
-					e.position = newElementPosition++
+		for (var i = 0; i < elementList.length; i++) {
+			for (var j = 0; j < elementList.length; j++) {
+				var e = elementList[j]
+				if (e.position === i) {
 					newElementList.push(e)
+					break;
 				}
 			}
-
-			elementList = newElementList
 		}
 
-
-		rearrangeElements();
+		elementList = newElementList
 	}
 
-	function rearrangeElements() {
+	function arrangeElements(animated = true) {
 		var y = 0
 		for (var i = 0; i < elementList.length; i++)  {
 			var e = elementList[i];
-			e.moveToY(y, rearrangementDuration)
+
+			if (animated) {
+				e.moveToY(y, arrangementDuration)
+			} else {
+				e.y = y
+			}
 
 			y += e.height + margin
 		}

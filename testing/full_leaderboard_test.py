@@ -9,6 +9,8 @@ LEADERBOARD_SUB_ADDRESS = "ipc:///tmp/RAAI/leaderboard.ipc"
 pub_socket = pynng.Pub0()
 pub_socket.listen(LEADERBOARD_SUB_ADDRESS)
 
+time.sleep(0.5)
+
 while True:
 # Define a list of driver names
     driver_dict = {
@@ -24,6 +26,7 @@ while True:
         "Kotzbröckli": round(random.uniform(1, 100), 2)
     }
 
+    print(driver_dict)
 
     # Convert the selected driver to a json string
     leaderboard_json = json.dumps(driver_dict)
@@ -31,6 +34,8 @@ while True:
     topic = "leaderboard: "
     data = topic + leaderboard_json
 
-    pub_socket.send(data.encode('utf-8'))
+    pub_socket.send(data.encode("utf-8"))
+
     print("Leaderboard published")
+    break
     time.sleep(3)

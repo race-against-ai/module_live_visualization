@@ -218,11 +218,12 @@ class LiveVisualization:
                 self.t_model.set_third_sector_color(color)
 
     def leaderboard_receiver(self) -> None:
-        msg = self.leaderboard_sub.recv()
-        decoded_data: str = msg.decode()
+        msg = self.leaderboard_sub.recv_msg()
+        decoded_data: str = msg.bytes.decode()
         i = decoded_data.find(" ")
         decoded_data = decoded_data[i + 1 :]
         data = json.loads(decoded_data)
+        print("leaderboard_receiver() called")
         
         self.leaderboard_model.update_leaderboard(data)
 
