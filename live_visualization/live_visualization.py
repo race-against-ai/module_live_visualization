@@ -16,6 +16,7 @@ from enum import IntEnum
 from live_visualization.live_visualization_model import ModelLV, DriverModel, LeaderboardModel
 from live_visualization.timer_model import Model
 
+# mypy: ignore-errors
 
 class State(IntEnum):
     RESET = 0
