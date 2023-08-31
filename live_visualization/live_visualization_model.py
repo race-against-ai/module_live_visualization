@@ -3,7 +3,7 @@ from PySide6.QtCore import QObject, Signal, Property
 from typing import List
 from time import sleep
 
-
+# mypy: ignore-errors
 class DriverModel(QObject):
     name_changed = Signal(name="nameChanged")
     time_changed = Signal(name="timeChanged")

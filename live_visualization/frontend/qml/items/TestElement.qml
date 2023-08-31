@@ -5,12 +5,33 @@ AnimatedColumnElement {
 	id: animatedColumnElement
 
 	property var driverModel
+    property bool driverInfoVisible: false
 
+    MouseArea {
+        id: driverInfoArea
+        anchors.fill: parent
+        onClicked: {
+            console.log(driverModel.name + "Object clicked!");
+            if(driverInfoVisible === false) {
+                parent.height = window.height * 0.2;
+                driverInfoVisible = true;
+            } else {
+                parent.height = Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 });
+                driverInfoVisible = false;
+            }
+        }
+    }
+
+    Rectangle {
+        id: driverInfoBackground
+        anchors.fill: parent
+        color: "black"
+    }
 
 	Text {
 		id: positionText
 		text: driverModel.position + 1
-		font.pointSize: parent.height * 0.4
+        font.pointSize: window.height * 0.015
 		x: parent.width * 0.05
 		color: "white"
 		font.family: fontLoaderWide.name
@@ -19,9 +40,9 @@ AnimatedColumnElement {
 
 	Text {
 		id: nameText
-		text: driverModel.name.substring(0,3)
+        text: driverInfoVisible ? driverModel.name : driverModel.name.substring(0,3)
 		x: parent.width * 0.2
-		font.pointSize: parent.height * 0.4
+        font.pointSize: window.height * 0.015
 		font.family: fontLoaderWide.name
 		verticalAlignment: Qt.AlignVCenter
 		color: "white"
@@ -30,7 +51,8 @@ AnimatedColumnElement {
 	Text {
 		id: timeText
 		text: driverModel.time
-		font.pointSize: parent.height * 0.35
+        visible: !driverInfoVisible
+        font.pointSize: window.height * 0.015
 		font.family: fontLoaderWide.name
 		x: parent.width / 2
 		color: {
@@ -50,7 +72,7 @@ AnimatedColumnElement {
 	Svg {
 		id: improvementSymbol
 		source: "./../../images/svg/improvement_symbol.svg"
-		height: parent.height * 0.25
+        height: window.height * 0.01
 		fillMode: Image.PreserveAspectFit
 		x: parent.width * 0.05
 		anchors.bottom: positionText.top
@@ -66,7 +88,7 @@ AnimatedColumnElement {
 	Svg {
 		id: declineSymbol
 		source: "./../../images/svg/decline_symbol.svg"
-		height: parent.height * 0.25
+        height: window.height * 0.01
 		fillMode: Image.PreserveAspectFit
 		x: parent.width * 0.05
 		anchors.top: positionText.bottom

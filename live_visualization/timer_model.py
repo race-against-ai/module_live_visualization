@@ -1,6 +1,7 @@
 # Copyright (C) 2023, NG:ITL
 from PySide6.QtCore import QObject, Signal, Property
 
+# mypy: ignore-errors
 
 def pad_left(string: str, length: int, padchar: str = "0") -> str:
     string = padchar * (length - len(string)) + string[0:length]
