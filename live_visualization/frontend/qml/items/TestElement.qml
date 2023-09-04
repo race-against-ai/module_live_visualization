@@ -7,12 +7,6 @@ AnimatedColumnElement {
         property bool driverInfoVisible: false
         property int originalHeight: (leaderboardBackgroundDrivers.height * 0.85) / 20
 
-    Behavior on height {
-        PropertyAnimation {
-            duration: 250
-        }
-    }
-
     MouseArea {
         anchors.fill: parent
 
@@ -20,9 +14,11 @@ AnimatedColumnElement {
              if(!driverInfoVisible) {
                  driverInfoVisible = true;
                  animatedColumnElement.height = window.height * 0.15;
+                 leaderboardContent.arrangeElements();
              } else {
                  driverInfoVisible = false;
                  animatedColumnElement. height = originalHeight;
+                 leaderboardContent.arrangeElements();
              }
         }
     }
@@ -221,14 +217,7 @@ AnimatedColumnElement {
 				duration: 125
 			}
 		}
-	}
-
-//    Text {
-//        anchors.left: numberText.right
-//        font.pixelSize: 40
-//        text: driverModel.place
-//        color: "white"
-//    }
+    }
 
 	Timer {
 		id: colorTimer
@@ -261,10 +250,6 @@ AnimatedColumnElement {
 		if (movingDown) {
 			declineTimer.start()
 		}
-	}
-
-    onDriverInfoVisibleChanged: {
-        leaderboardContent.arrangeElements();
     }
 
 	Connections {
