@@ -8,15 +8,17 @@ class DriverModel(QObject):
     name_changed = Signal(name="nameChanged")
     time_changed = Signal(name="timeChanged")
     position_changed = Signal(name="positionChanged")
-    formatted_time_changed = Signal(name="formatted_time_changed")
+    formatted_time_changed = Signal(name="formattedTimeChanged")
     time_improved = Signal(name="time_improved")
+    gap_to_first = Signal(name="gapToFirst")
 
-    def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "") -> None:
+    def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "", gap_to_first: float = None) -> None:
         QObject.__init__(self)
         self._name = name
         self._time = time
         self._position = position
         self._formatted_time = formatted_time
+        self._gap_to_first = gap_to_first
   
     def get_name(self) -> str:
         return self._name
@@ -26,6 +28,9 @@ class DriverModel(QObject):
     
     def get_position(self) -> int:
         return self._position
+    
+    def get_gap_to_first(self) -> float:
+        return self._gap_to_first
     
     def get_formatted_time(self) -> str:
         minutes = int(self._time / 60)
@@ -45,10 +50,15 @@ class DriverModel(QObject):
         self._position = position
         self.position_changed.emit()
 
+    def set_gap_to_first(self, gap_to_first: float) -> None:
+        self._gap_to_first = gap_to_first
+        self.gap_to_first.emit()
+
     name = Property(str, get_name, set_name, notify=name_changed)
     time = Property(float, get_time, set_time, notify=time_changed)
     position = Property(int, get_position, set_position, notify=position_changed)
-    formatted_time = Property(str, get_formatted_time, notify=formatted_time_changed)
+    formatted_time = Property(str, get_formatted_time, notify=time_changed)
+    gap_to_first = Property(float, get_gap_to_first, set_gap_to_first, notify=gap_to_first)
 
 
 class LeaderboardModel(QObject):

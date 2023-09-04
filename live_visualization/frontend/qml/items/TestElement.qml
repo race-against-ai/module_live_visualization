@@ -2,30 +2,91 @@ import QtQuick 2.0
 
 AnimatedColumnElement {
 
-	id: animatedColumnElement
+    id: animatedColumnElement
+        property var driverModel
+        property bool driverInfoVisible: false
+        property int originalHeight: (leaderboardBackgroundDrivers.height * 0.85) / 20
 
-	property var driverModel
-    property bool driverInfoVisible: false
+    Behavior on height {
+        PropertyAnimation {
+            duration: 250
+        }
+    }
 
     MouseArea {
-        id: driverInfoArea
         anchors.fill: parent
+
         onClicked: {
-            console.log(driverModel.name + "Object clicked!");
-            if(driverInfoVisible === false) {
-                parent.height = window.height * 0.2;
-                driverInfoVisible = true;
-            } else {
-                parent.height = Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 });
-                driverInfoVisible = false;
-            }
+             if(!driverInfoVisible) {
+                 driverInfoVisible = true;
+                 animatedColumnElement.height = window.height * 0.15;
+             } else {
+                 driverInfoVisible = false;
+                 animatedColumnElement. height = originalHeight;
+             }
         }
     }
 
     Rectangle {
         id: driverInfoBackground
         anchors.fill: parent
+        opacity: driverInfoVisible ? 0.5 : 0;
         color: "black"
+        radius: 10
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 500
+            }
+        }
+    }
+
+    Rectangle {
+        id: bestTimeBackground
+        height: parent.height
+        width: 0
+        color: "#a037a6"
+        radius: 10
+        opacity: 0.9
+
+        SequentialAnimation {
+            id: widthAnimation
+
+            NumberAnimation {
+                target: bestTimeBackground
+                to: parent.width
+                property: "width"
+                duration: 500
+                running: false
+            }
+
+
+            PauseAnimation {
+                duration: 1000
+            }
+
+            ParallelAnimation {
+
+                NumberAnimation {
+                    target: bestTimeBackground
+                    to: parent.width
+                    property: "x"
+                    duration: 250
+                    running: false
+                    onStopped: {
+                        bestTimeBackground.x = 0
+                    }
+                }
+
+                NumberAnimation {
+                    target: bestTimeBackground
+                    to: 0
+                    property: "width"
+                    duration: 250
+                    running: false
+                }
+            }
+        }
     }
 
 	Text {
@@ -40,7 +101,7 @@ AnimatedColumnElement {
 
 	Text {
 		id: nameText
-        text: driverInfoVisible ? driverModel.name : driverModel.name.substring(0,3)
+        text: driverInfoVisible ? driverModel.name.substring(0,15) : driverModel.name.substring(0,3)
 		x: parent.width * 0.2
         font.pointSize: window.height * 0.015
 		font.family: fontLoaderWide.name
@@ -50,15 +111,17 @@ AnimatedColumnElement {
 
 	Text {
 		id: timeText
-		text: driverModel.time
-        visible: !driverInfoVisible
-        font.pointSize: window.height * 0.015
+        text: driverModel.formatted_time
+        opacity: driverInfoVisible ? 0 : 1
+        font.pointSize: window.height * 0.0125
 		font.family: fontLoaderWide.name
 		x: parent.width / 2
+        verticalAlignment: Qt.AlignVCenter
 		color: {
 			if (colorTimer.running){
 				if(driverModel.position === 0) {
-					return "purple";
+                    widthAnimation.start();
+                    return "white";
 				}
 				else {
 					return "green";
@@ -67,7 +130,66 @@ AnimatedColumnElement {
 				return "white";
 			}
 		}
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+            }
+        }
 	}
+
+    Text {
+        id: bigTimeText
+        text: driverModel.formatted_time
+        font.pointSize: window.height * 0.02
+        font.family: fontLoaderWide.name
+        anchors.top: timeText.bottom
+        opacity: driverInfoVisible ? 1 : 0
+        x: parent.width * 0.2
+        color: "white"
+        y: parent.height * 0.2
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+            }
+        }
+    }
+
+    Text {
+        id: avgSpeed
+        text: "Avg. Speed 3 m/s"
+        font.pointSize: window.height * 0.0125
+        font.family: fontLoaderWide.name
+        anchors.top: bigTimeText.bottom
+        opacity: driverInfoVisible ? 1 : 0
+        x: parent.width * 0.2
+        color: "#6b6b6b"
+        y: parent.height * 0.1
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+            }
+        }
+    }
+
+    Text {
+        id: sessionTime
+        text: "Session Time 1"
+        font.pointSize: window.height * 0.0125
+        font.family: fontLoaderWide.name
+        anchors.top: avgSpeed.bottom
+        opacity: driverInfoVisible ? 1 : 0
+        x: parent.width * 0.2
+        color: "#6b6b6b"
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+            }
+        }
+    }
 
 	Svg {
 		id: improvementSymbol
@@ -127,7 +249,7 @@ AnimatedColumnElement {
 		running: false
 		interval: 1500
 		repeat: false
-	}
+    }
 
 	onMovingUpChanged: {
 		if (movingUp) {
@@ -141,16 +263,20 @@ AnimatedColumnElement {
 		}
 	}
 
+    onDriverInfoVisibleChanged: {
+        leaderboardContent.arrangeElements();
+    }
+
 	Connections {
 		target: driverModel
 
 		onPositionChanged: {
-			animatedColumnElement.position = driverModel.position
+            animatedColumnElement.position = driverModel.position;
 		}
 
 		onTimeChanged: {
 			colorTimer.start()
-		}
-	}
+        }
+    }
 
 }
