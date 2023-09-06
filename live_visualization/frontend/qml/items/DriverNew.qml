@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.15
 
 AnimatedColumnElement {
 
@@ -26,9 +26,16 @@ AnimatedColumnElement {
     Rectangle {
         id: driverInfoBackground
         anchors.fill: parent
-        opacity: driverInfoVisible ? 0.5 : 0;
-        color: "black"
-        radius: 10
+        opacity: driverInfoVisible ? 1 : 0
+        radius: 5
+        border.color: "black"
+        border.width: 2
+
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#010101" }
+            GradientStop { position: 0.1; color: "#1D1D1D" }
+            GradientStop { position: 1.0; color: "#2A2A2A" }
+        }
 
         Behavior on opacity {
             NumberAnimation {
@@ -39,11 +46,16 @@ AnimatedColumnElement {
 
     Rectangle {
         id: bestTimeBackground
-        height: parent.height
+        height: parent.height * 0.75
         width: 0
-        color: "#a037a6"
-        radius: 10
-        opacity: 0.9
+        radius: 5
+        opacity: 0.8
+
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: "#792088" }
+            GradientStop { position: 1.0; color: "#9444A2" }
+        }
 
         SequentialAnimation {
             id: widthAnimation
@@ -69,9 +81,6 @@ AnimatedColumnElement {
                     property: "x"
                     duration: 250
                     running: false
-                    onStopped: {
-                        bestTimeBackground.x = 0
-                    }
                 }
 
                 NumberAnimation {
@@ -81,6 +90,14 @@ AnimatedColumnElement {
                     duration: 250
                     running: false
                 }
+            }
+
+            NumberAnimation {
+                target: bestTimeBackground
+                to: 0
+                property: "x"
+                duration: 100
+                running: false
             }
         }
     }

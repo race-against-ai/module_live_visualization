@@ -5,21 +5,7 @@ import QtQuick.Layouts 1.15
 Item {
 	id: leaderboardContainer
 	anchors.fill: parent
-	property bool timeVisible: true
-
-	MouseArea {
-		anchors.fill: leaderboardContent
-		onClicked: {
-			if(leaderboardContainer.timeVisible === false) {
-				widthAnimation.to = 0;
-				leaderboardContainer.timeVisible = true;
-			} else {
-				widthAnimation.to = window.height * 0.21;
-				leaderboardContainer.timeVisible = false;
-			}
-			widthAnimation.start();
-		}
-	}
+    property bool timeVisible: true
 
 	Svg {
 		id: leaderboardBackgroundTimes
@@ -78,33 +64,26 @@ Item {
 		y: parent.height * 0.15
 
 		anchors.horizontalCenter: leaderboardBackgroundTimes.horizontalCenter
-	}
-
-	PropertyAnimation {
-		id: widthAnimation
-		target: fullNameRectangle
-		property: "width"
-		duration: 500
-	}
+    }
 
 	onHeightChanged: {
-		leaderboardContent.arrangeElements(false)
-	}
+        leaderboardContent.arrangeElements(false)
+    }
 
 	Connections {
 		target: leaderboard_model
 
-		onNewDriverAdded: {
+        onNewDriverAdded: {
 
-			console.log("New driver added: " + newDriverModel.name);
-			var comp = Qt.createComponent("TestElement.qml");
-			var elem = comp.createObject(leaderboardContent, {
-				width: Qt.binding(function() { return leaderboardContent.width }),
-				height: Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 }),
-				position: newDriverModel.position,
-				driverModel: newDriverModel
-			})
-			leaderboardContent.elementList.push(elem)
+            console.log("New driver added: " + newDriverModel.name);
+            var comp = Qt.createComponent("DriverNew.qml");
+            var elem = comp.createObject(leaderboardContent, {
+                width: Qt.binding(function() { return leaderboardContent.width }),
+                height: Qt.binding(function() { return (leaderboardBackgroundDrivers.height * 0.85) / 20 }),
+                position: newDriverModel.position,
+                driverModel: newDriverModel
+            })
+            leaderboardContent.elementList.push(elem)
 
 		}
 

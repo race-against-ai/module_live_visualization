@@ -93,8 +93,8 @@ class LeaderboardModel(QObject):
             if not self.check_if_driver_exists(updated_driver_name):
                 new_driver_model = DriverModel(updated_driver_name, updated_driver_time)
                 self._leaderboard_entries.append(new_driver_model)
-                self.new_driver_added_signal.emit(new_driver_model)
                 self.sort_leaderboard()
+                self.new_driver_added_signal.emit(new_driver_model)
                 print("new driver added")
             else:
                 for existing_driver_entry in self._leaderboard_entries:
