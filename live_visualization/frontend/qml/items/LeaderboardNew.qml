@@ -6,6 +6,7 @@ Item {
 	id: leaderboardContainer
 	anchors.fill: parent
     property bool timeVisible: true
+    property bool absoluteDeltaTime: true
 
 	Svg {
 		id: leaderboardBackgroundTimes
@@ -68,6 +69,28 @@ Item {
 
 	onHeightChanged: {
         leaderboardContent.arrangeElements(false)
+    }
+
+    CostumButton {
+        anchors.left: leaderboardContent.left
+        text: {
+            if(!absoluteDeltaTime) {
+                return "Display delta times"
+            } else {
+                return "Display abs. times"
+            }
+        }
+
+        anchors.bottom: parent.bottom
+        height: parent.height * 0.05
+        width: leaderboardContent.width
+        onClicked: {
+            if(absoluteDeltaTime) {
+                absoluteDeltaTime = false;
+            } else {
+                absoluteDeltaTime = true;
+            }
+        }
     }
 
 	Connections {

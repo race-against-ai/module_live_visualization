@@ -10,7 +10,7 @@ class DriverModel(QObject):
     position_changed = Signal(name="positionChanged")
     formatted_time_changed = Signal(name="formattedTimeChanged")
     time_improved = Signal(name="time_improved")
-    gap_to_first = Signal(name="gapToFirst")
+    gap_to_first_changed = Signal(name="gapToFirst")
 
     def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "", gap_to_first: float = None) -> None:
         QObject.__init__(self)
@@ -52,13 +52,13 @@ class DriverModel(QObject):
 
     def set_gap_to_first(self, gap_to_first: float) -> None:
         self._gap_to_first = gap_to_first
-        self.gap_to_first.emit()
+        self.gap_to_first_changed.emit()
 
     name = Property(str, get_name, set_name, notify=name_changed)
     time = Property(float, get_time, set_time, notify=time_changed)
     position = Property(int, get_position, set_position, notify=position_changed)
     formatted_time = Property(str, get_formatted_time, notify=time_changed)
-    gap_to_first = Property(float, get_gap_to_first, set_gap_to_first, notify=gap_to_first)
+    gap_to_first = Property(float, get_gap_to_first, set_gap_to_first, notify=gap_to_first_changed)
 
 
 class LeaderboardModel(QObject):
@@ -86,6 +86,12 @@ class LeaderboardModel(QObject):
         self._leaderboard_entries.sort(key=lambda x: x.time)
         for i in range(len(self._leaderboard_entries)):
             self._leaderboard_entries[i].set_position(i)
+
+    def set_gap_to_first(self) -> None:
+        if len(self._leaderboard_entries) > 0:
+            first_driver_time = self._leaderboard_entries[0].time
+            for driver in self._leaderboard_entries:
+                driver.set_gap_to_first(round(driver.time - first_driver_time, 2))
     
     def update_leaderboard(self, updated_leaderboard: dict) -> None:
         for updated_driver_name in updated_leaderboard:
@@ -105,6 +111,7 @@ class LeaderboardModel(QObject):
                             print(f"Updated time: Driver=\"{updated_driver_name}\", Time=\"{updated_driver_time}\"")
 
         self.sort_leaderboard()
+        self.set_gap_to_first()
         self.leaderboard_updated_signal.emit()
 
     leaderboard = Property(list, get_leaderboard, update_leaderboard, notify=leaderboard_updated_signal)

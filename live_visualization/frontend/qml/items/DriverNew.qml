@@ -124,7 +124,18 @@ AnimatedColumnElement {
 
 	Text {
 		id: timeText
-        text: driverModel.formatted_time
+        text: {
+            if(leaderboardContainer.absoluteDeltaTime) {
+                if(driverModel.position === 0) {
+                    return driverModel.formatted_time;
+                } else {
+                    return "+" + driverModel.gap_to_first;
+                }
+            } else {
+                return driverModel.formatted_time;
+            }
+        }
+
         opacity: driverInfoVisible ? 0 : 1
         font.pointSize: window.height * 0.0125
 		font.family: fontLoaderWide.name
