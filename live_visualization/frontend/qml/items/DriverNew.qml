@@ -23,6 +23,37 @@ AnimatedColumnElement {
         }
     }
 
+    Svg {
+        id: bestTimeSymbol
+        source: "./../../images/svg/best_time_symbol.svg"
+        fillMode: Image.PreserveAspectFit
+        height: parent.height * 0.75
+        anchors.left: parent.right
+        opacity: 0
+
+        SequentialAnimation {
+            id: bestTimeSymbolAnimation
+
+            NumberAnimation {
+                target: bestTimeSymbol
+                property: "opacity"
+                to: 1
+                duration: 500
+            }
+
+            PauseAnimation {
+                duration: 2000
+            }
+
+            NumberAnimation {
+                target: bestTimeSymbol
+                property: "opacity"
+                duration: 500
+                to: 0
+            }
+        }
+    }
+
     Rectangle {
         id: driverInfoBackground
         anchors.fill: parent
@@ -103,27 +134,27 @@ AnimatedColumnElement {
     }
 
 	Text {
-		id: positionText
-		text: driverModel.position + 1
+        id: positionText
+        text: driverModel.position + 1
         font.pointSize: window.height * 0.015
-		x: parent.width * 0.05
-		color: "white"
-		font.family: fontLoaderWide.name
-		verticalAlignment: Qt.AlignVCenter
+        x: parent.width * 0.05
+        color: "white"
+        font.family: fontLoaderWide.name
+        verticalAlignment: Qt.AlignVCenter
 	}
 
 	Text {
-		id: nameText
+        id: nameText
         text: driverInfoVisible ? driverModel.name.substring(0,15) : driverModel.name.substring(0,3)
-		x: parent.width * 0.2
+        x: parent.width * 0.2
         font.pointSize: window.height * 0.015
-		font.family: fontLoaderWide.name
-		verticalAlignment: Qt.AlignVCenter
-		color: "white"
+        font.family: fontLoaderWide.name
+        verticalAlignment: Qt.AlignVCenter
+        color: "white"
 	}
 
 	Text {
-		id: timeText
+        id: timeText
         text: {
             if(leaderboardContainer.absoluteDeltaTime) {
                 if(driverModel.position === 0) {
@@ -144,8 +175,9 @@ AnimatedColumnElement {
 		color: {
 			if (colorTimer.running){
 				if(driverModel.position === 0) {
-                    widthAnimation.start();
-                    return "white";
+                        widthAnimation.start();
+                        bestTimeSymbolAnimation.start();
+                        return "white";
 				}
 				else {
 					return "green";
@@ -215,80 +247,80 @@ AnimatedColumnElement {
         }
     }
 
-	Svg {
-		id: improvementSymbol
-		source: "./../../images/svg/improvement_symbol.svg"
+    Svg {
+        id: improvementSymbol
+        source: "./../../images/svg/improvement_symbol.svg"
         height: window.height * 0.01
-		fillMode: Image.PreserveAspectFit
-		x: parent.width * 0.05
-		anchors.bottom: positionText.top
-		opacity: improvementTimer.running ? 1 : 0
+        fillMode: Image.PreserveAspectFit
+        x: parent.width * 0.05
+        anchors.bottom: positionText.top
+        opacity: improvementTimer.running ? 1 : 0
 
-		Behavior on opacity {
-			NumberAnimation {
-				duration: 125
-			}
-		}
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 125
+            }
+        }
 	}
 
-	Svg {
-		id: declineSymbol
-		source: "./../../images/svg/decline_symbol.svg"
+    Svg {
+        id: declineSymbol
+        source: "./../../images/svg/decline_symbol.svg"
         height: window.height * 0.01
-		fillMode: Image.PreserveAspectFit
-		x: parent.width * 0.05
-		anchors.top: positionText.bottom
-		opacity: declineTimer.running ? 1 : 0
+        fillMode: Image.PreserveAspectFit
+        x: parent.width * 0.05
+        anchors.top: positionText.bottom
+        opacity: declineTimer.running ? 1 : 0
 
-		Behavior on opacity {
-			NumberAnimation {
-				duration: 125
-			}
-		}
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 125
+            }
+        }
     }
 
-	Timer {
-		id: colorTimer
-		running: false
-		interval: 1500
-		repeat: false
-	}
-
-	Timer {
-		id: declineTimer
-		running: false
-		interval: 1500
-		repeat: false
-	}
-
-	Timer {
-		id: improvementTimer
-		running: false
-		interval: 1500
-		repeat: false
+    Timer {
+        id: colorTimer
+        running: false
+        interval: 1500
+        repeat: false
     }
 
-	onMovingUpChanged: {
-		if (movingUp) {
-			improvementTimer.start()
-		}
-	}
-
-	onMovingDownChanged: {
-		if (movingDown) {
-			declineTimer.start()
-		}
+    Timer {
+        id: declineTimer
+        running: false
+        interval: 1500
+        repeat: false
     }
 
-	Connections {
-		target: driverModel
+    Timer {
+        id: improvementTimer
+        running: false
+        interval: 1500
+        repeat: false
+    }
 
-		onPositionChanged: {
+    onMovingUpChanged: {
+        if (movingUp) {
+            improvementTimer.start()
+        }
+    }
+
+    onMovingDownChanged: {
+        if (movingDown) {
+            declineTimer.start()
+        }
+    }
+
+    Connections {
+        target: driverModel
+
+        onPositionChanged: {
             animatedColumnElement.position = driverModel.position;
-		}
+        }
 
-		onTimeChanged: {
-			colorTimer.start()
+        onTimeChanged: {
+            colorTimer.start()
         }
     }
 

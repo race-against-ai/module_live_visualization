@@ -116,4 +116,12 @@ Item {
 		}
 	}
 
+    Connections {
+        target: window
+
+        onIsFullScreenChanged: {
+            leaderboardContent.arrangeElements()
+        }
+    }
+
 }
