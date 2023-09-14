@@ -8,6 +8,8 @@ Item {
     property bool timeVisible: true
     property bool absoluteDeltaTime: true
 
+    signal requestNewLeaderboardSignal
+
 	Svg {
 		id: leaderboardBackgroundTimes
 		source: "./../../images/svg/test_image_0_times.svg"
@@ -90,6 +92,19 @@ Item {
             } else {
                 absoluteDeltaTime = true;
             }
+        }
+    }
+
+    CostumButton {
+        id: requestLeaderboardButton
+        objectName: "requestLeaderboardButton"
+        anchors.left: leaderboardContent.right
+        text: "Update Leaderboard"
+        height: parent.height * 0.05
+        width: leaderboardContent.width / 2
+        onClicked: {
+            console.log("Request button presses!")
+            requestNewLeaderboardSignal()
         }
     }
 

@@ -2,6 +2,7 @@
 from PySide6.QtCore import QObject, Signal, Property
 from typing import List
 from time import sleep
+import pynng
 
 # mypy: ignore-errors
 class DriverModel(QObject):
@@ -64,11 +65,13 @@ class DriverModel(QObject):
 class LeaderboardModel(QObject):
     leaderboard_updated_signal = Signal(name="leaderboardUpdated")
     new_driver_added_signal = Signal(DriverModel, name="newDriverAdded", arguments=["newDriverModel"])
+    request_new_leaderboard_signal = Signal(name="requestNewLeaderboardSignal")
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._leaderboard_entries: List[DriverModel] = []
         self._current_driver: DriverModel = None
+        self.request_new_leaderboard_signal.connect(self.request_new_leaderboard)
         
     def get_leaderboard(self) -> list:
         return self._leaderboard_entries
@@ -92,6 +95,17 @@ class LeaderboardModel(QObject):
             first_driver_time = self._leaderboard_entries[0].time
             for driver in self._leaderboard_entries:
                 driver.set_gap_to_first(round(driver.time - first_driver_time, 2))
+
+    def request_new_leaderboard(self) -> None:
+        address = "ipc:///tmp/RAAI/leaderboard_database.ipc"
+        print("t")
+        with pynng.Req0() as sock:
+            sock.dial(address)
+            sleep(0.5)
+            print("Sending leaderboard request...")
+            sock.send(b"leaderboard_request")
+            msg = sock.recv()
+            self.update_leaderboard(msg.decode("utf-8"))
     
     def update_leaderboard(self, updated_leaderboard: dict) -> None:
         for updated_driver_name in updated_leaderboard:
