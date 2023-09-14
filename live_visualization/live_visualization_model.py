@@ -98,7 +98,7 @@ class LeaderboardModel(QObject):
 
     def request_new_leaderboard(self) -> None:
         address = "ipc:///tmp/RAAI/leaderboard_database.ipc"
-        print("t")
+        print("foo")
         with pynng.Req0() as sock:
             sock.dial(address)
             sleep(0.5)

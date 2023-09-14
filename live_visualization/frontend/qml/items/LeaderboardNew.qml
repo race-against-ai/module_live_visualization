@@ -104,7 +104,7 @@ Item {
         width: leaderboardContent.width / 2
         onClicked: {
             console.log("Request button presses!")
-            requestNewLeaderboardSignal()
+            leaderboardContainer.requestNewLeaderboardSignal
         }
     }
 
