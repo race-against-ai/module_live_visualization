@@ -74,18 +74,19 @@ Item {
     }
 
     CostumButton {
+        id: timeSwitchButton
         anchors.left: leaderboardContent.left
         text: {
             if(!absoluteDeltaTime) {
-                return "Display delta times"
+                return "Delta"
             } else {
-                return "Display abs. times"
+                return "Abs."
             }
         }
 
         anchors.bottom: parent.bottom
         height: parent.height * 0.05
-        width: leaderboardContent.width
+        width: leaderboardContent.width / 2
         onClicked: {
             if(absoluteDeltaTime) {
                 absoluteDeltaTime = false;
@@ -98,13 +99,14 @@ Item {
     CostumButton {
         id: requestLeaderboardButton
         objectName: "requestLeaderboardButton"
-        anchors.left: leaderboardContent.right
-        text: "Update Leaderboard"
+        text: "Update"
         height: parent.height * 0.05
         width: leaderboardContent.width / 2
+        anchors.left: timeSwitchButton.right
+        anchors.bottom: parent.bottom
         onClicked: {
             console.log("Request button presses!")
-            leaderboardContainer.requestNewLeaderboardSignal
+            requestNewLeaderboardSignal()
         }
     }
 
@@ -136,6 +138,15 @@ Item {
 
         onIsFullScreenChanged: {
             leaderboardContent.arrangeElements()
+        }
+    }
+
+    Connections {
+        target: leaderboardContainer
+
+        onRequestNewLeaderboardSignal: {
+            console.log("Connection")
+            leaderboard_model.requestNewLeaderboard()
         }
     }
 

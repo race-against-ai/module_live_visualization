@@ -3,6 +3,10 @@ from PySide6.QtCore import QObject, Signal, Property
 from typing import List
 from time import sleep
 import pynng
+import pynng.exceptions
+import json
+
+LEADERBOARD_REQUEST_ADDRESS = "ipc:///tmp/RAAI/leaderboard_database.ipc"
 
 # mypy: ignore-errors
 class DriverModel(QObject):
@@ -65,8 +69,8 @@ class DriverModel(QObject):
 class LeaderboardModel(QObject):
     leaderboard_updated_signal = Signal(name="leaderboardUpdated")
     new_driver_added_signal = Signal(DriverModel, name="newDriverAdded", arguments=["newDriverModel"])
-    request_new_leaderboard_signal = Signal(name="requestNewLeaderboardSignal")
-
+    request_new_leaderboard_signal = Signal(name="requestNewLeaderboard")
+    
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._leaderboard_entries: List[DriverModel] = []
@@ -97,16 +101,36 @@ class LeaderboardModel(QObject):
                 driver.set_gap_to_first(round(driver.time - first_driver_time, 2))
 
     def request_new_leaderboard(self) -> None:
-        address = "ipc:///tmp/RAAI/leaderboard_database.ipc"
-        print("foo")
-        with pynng.Req0() as sock:
-            sock.dial(address)
-            sleep(0.5)
-            print("Sending leaderboard request...")
-            sock.send(b"leaderboard_request")
-            msg = sock.recv()
-            self.update_leaderboard(msg.decode("utf-8"))
+        try:
+            with pynng.Req0(recv_timeout=500) as sock:
+                sock.dial(LEADERBOARD_REQUEST_ADDRESS)
+                print("Sending leaderboard request...")
+                sock.send(b"leaderboard_request")
+
+                try:
+                    msg = sock.recv_msg()
+                    decoded_data: str = msg.bytes.decode()
+                    i = decoded_data.find(" ")
+                    decoded_data = decoded_data[i + 1 :]
+                    data = json.loads(decoded_data)
+                    print("leaderboard_receiver() called")
+
+                    self.update_leaderboard(data)
+
+                except pynng.Timeout:
+                    print("Leaderboard request timed out")
+                    pass
+
+                finally:
+                    sock.close()
+                    
+        except pynng.exceptions.ConnectionRefused:
+            print("Connection refused")
+            pass
     
+    def print_test(self) -> None:
+        print("test")
+
     def update_leaderboard(self, updated_leaderboard: dict) -> None:
         for updated_driver_name in updated_leaderboard:
             updated_driver_time = updated_leaderboard[updated_driver_name]
