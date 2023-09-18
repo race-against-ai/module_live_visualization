@@ -119,14 +119,12 @@ class LeaderboardModel(QObject):
 
                 except pynng.Timeout:
                     print("Leaderboard request timed out")
-                    pass
 
                 finally:
                     sock.close()
                     
-        except pynng.exceptions.ConnectionRefused:
+        except Exception:
             print("Connection refused")
-            pass
     
     def print_test(self) -> None:
         print("test")
