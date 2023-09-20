@@ -176,9 +176,8 @@ class LiveVisualization:
         i = decoded_data.find(" ")
         decoded_data = decoded_data[i + 1 :]
         data = json.loads(decoded_data)
-        if "lap_best_time" in data:
-            print("Lap started")
 
+        if "lap_best_time" in data:
             self.t_model.set_best_time(int(data["lap_best_time"] * 1000000000))
             self.start_stop_button_clicked()
 
@@ -201,13 +200,10 @@ class LiveVisualization:
 
         if "lap_time" in data:
             self.reset_button_clicked()
-            print(data["lap_valid"])
             if data["lap_valid"]:
-                print(self.t_model.get_best_time_formatted())
-                print(data["lap_time"])
                 self.t_model.set_split_time(self.t_model.get_lap_time_difference(data["lap_time"] * 1000000000))
-                print(self.t_model.get_lap_time_difference(data["lap_time"]))
                 self.t_model.trigger_delta()
+                self.set_leaderboard(data["curent_driver"], data["lap_time"])
 
     def _update_sector_color(self, sector, color) -> None:
         match sector:
@@ -217,6 +213,9 @@ class LiveVisualization:
                 self.t_model.set_second_sector_color(color)
             case 3:
                 self.t_model.set_third_sector_color(color)
+
+    def set_leaderboard(self, driver: str, time: float) -> None:
+        self.leaderboard_model.update_leaderboard({driver: time})
 
     def leaderboard_receiver(self) -> None:
         msg = self.leaderboard_sub.recv_msg()
