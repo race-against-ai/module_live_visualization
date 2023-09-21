@@ -136,7 +136,7 @@ AnimatedColumnElement {
 	Text {
         id: positionText
         text: driverModel.position + 1
-        font.pointSize: window.height * 0.015
+        font.pointSize: driverModel.active ? window.height * 0.02 : window.height * 0.015
         x: parent.width * 0.05
         color: "white"
         font.family: fontLoaderWide.name
@@ -147,7 +147,7 @@ AnimatedColumnElement {
         id: nameText
         text: driverInfoVisible ? driverModel.name.substring(0,15) : driverModel.name.substring(0,3)
         x: parent.width * 0.2
-        font.pointSize: window.height * 0.015
+        font.pointSize: driverModel.active ? window.height * 0.02 : window.height * 0.015
         font.family: fontLoaderWide.name
         verticalAlignment: Qt.AlignVCenter
         color: "white"
@@ -213,8 +213,8 @@ AnimatedColumnElement {
     }
 
     Text {
-        id: avgSpeed
-        text: "Avg. Speed 3 m/s"
+        id: lapsCompleted
+        text: "Laps completed: " + driverModel.laps_completed
         font.pointSize: window.height * 0.0125
         font.family: fontLoaderWide.name
         anchors.top: bigTimeText.bottom

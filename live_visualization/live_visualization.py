@@ -178,6 +178,8 @@ class LiveVisualization:
         data = json.loads(decoded_data)
 
         if "lap_best_time" in data:
+            self.leaderboard_model.update_active_driver(data["current_driver"])
+
             self.t_model.set_best_time(int(data["lap_best_time"] * 1000000000))
             self.start_stop_button_clicked()
 
