@@ -10,7 +10,7 @@ time.sleep(0.5)
 
 # Define a list of driver names
 driver_dict = {
-    "Hans": round(random.uniform(1, 100), 2), 
+    "Hans": round(random.uniform(1, 100), 2),
     "Georg": round(random.uniform(1, 100), 2),
     "Hure": round(random.uniform(1, 100), 2),
     "Kahba": round(random.uniform(1, 100), 2),
@@ -19,7 +19,7 @@ driver_dict = {
     "Kotzbrocken": round(random.uniform(1, 100), 2),
     "Kotzbröckchen": round(random.uniform(1, 100), 2),
     "Kotzbröckle": round(random.uniform(1, 100), 2),
-    "Kotzbröckli": round(random.uniform(1, 100), 2)
+    "Kotzbröckli": round(random.uniform(1, 100), 2),
 }
 
 print(driver_dict)

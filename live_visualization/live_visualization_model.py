@@ -8,6 +8,7 @@ import json
 
 LEADERBOARD_REQUEST_ADDRESS = "ipc:///tmp/RAAI/leaderboard_database.ipc"
 
+
 # mypy: ignore-errors
 class DriverModel(QObject):
     name_changed = Signal(name="nameChanged")
@@ -19,7 +20,16 @@ class DriverModel(QObject):
     laps_completed_changed = Signal(name="lapsCompletedChanged")
     active_changed = Signal(name="activeChanged")
 
-    def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "", gap_to_first: float = None, laps_completed: int = 1, active: bool = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        time: float,
+        position: int = None,
+        formatted_time: str = "",
+        gap_to_first: float = None,
+        laps_completed: int = 1,
+        active: bool = None,
+    ) -> None:
         QObject.__init__(self)
         self._name = name
         self._time = time
@@ -28,28 +38,28 @@ class DriverModel(QObject):
         self._gap_to_first = gap_to_first
         self._laps_completed = laps_completed
         self._active = active
-  
+
     def get_name(self) -> str:
         return self._name
 
     def get_time(self) -> float:
         return self._time
-    
+
     def get_position(self) -> int:
         return self._position
-    
+
     def get_gap_to_first(self) -> float:
         return self._gap_to_first
-    
+
     def get_formatted_time(self) -> str:
         minutes = int(self._time / 60)
         seconds = int(self._time % 60)
         milliseconds = int((self._time - int(self._time)) * 1000)
         return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
-    
+
     def get_laps_completed(self) -> int:
         return self._laps_completed
-    
+
     def get_active(self) -> bool:
         return self._active
 
@@ -89,16 +99,16 @@ class LeaderboardModel(QObject):
     leaderboard_updated_signal = Signal(name="leaderboardUpdated")
     new_driver_added_signal = Signal(DriverModel, name="newDriverAdded", arguments=["newDriverModel"])
     request_new_leaderboard_signal = Signal(name="requestNewLeaderboard")
-    
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self._leaderboard_entries: List[DriverModel] = []
         self._current_driver: DriverModel = None
         self.request_new_leaderboard_signal.connect(self.request_new_leaderboard)
-        
+
     def get_leaderboard(self) -> list:
         return self._leaderboard_entries
-    
+
     def clear_leaderboard(self) -> None:
         self._leaderboard_entries = []
 
@@ -141,10 +151,10 @@ class LeaderboardModel(QObject):
 
                 finally:
                     sock.close()
-                    
+
         except Exception:
             print("Connection refused")
-    
+
     def print_test(self) -> None:
         print("test")
 
@@ -164,7 +174,7 @@ class LeaderboardModel(QObject):
                             existing_driver_entry.time = updated_driver_time
                             self.sort_leaderboard()
 
-                            print(f"Updated time: Driver=\"{updated_driver_name}\", Time=\"{updated_driver_time}\"")
+                            print(f'Updated time: Driver="{updated_driver_name}", Time="{updated_driver_time}"')
 
                         existing_driver_entry._laps_completed += 1
 
@@ -182,13 +192,10 @@ class LeaderboardModel(QObject):
     leaderboard = Property(list, get_leaderboard, update_leaderboard, notify=leaderboard_updated_signal)
 
 
-
 class ModelLV(QObject):
-
     def __init__(self) -> None:
         QObject.__init__(self)
 
     @Signal
     def reloadImage(self) -> None:
         pass
-

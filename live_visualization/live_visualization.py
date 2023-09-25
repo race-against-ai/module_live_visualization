@@ -18,6 +18,7 @@ from live_visualization.timer_model import Model
 
 # mypy: ignore-errors
 
+
 class State(IntEnum):
     RESET = 0
     RUNNING = 1
@@ -60,7 +61,7 @@ class LiveVisualization:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
         self.t_model = Model(0, 0, 0)
-        
+
         self.leaderboard_model = LeaderboardModel()
 
         self.live_visualization_model = ModelLV()
@@ -106,14 +107,14 @@ class LiveVisualization:
         self.timer_state = 0
 
     def run(self) -> None:
-        #try:
+        # try:
         if not self.engine.rootObjects():
             sys.exit(-1)
         print("started")
         self.app.exec()
-        #except:
-            #print("failed")
-            #pass
+        # except:
+        # print("failed")
+        # pass
 
     def check_if_image_available_pynng(self) -> bool:
         socket_list = [self.image_sub.recv_fd]
@@ -226,8 +227,9 @@ class LiveVisualization:
         decoded_data = decoded_data[i + 1 :]
         data = json.loads(decoded_data)
         print("leaderboard_receiver() called")
-        
+
         self.leaderboard_model.update_leaderboard(data)
+
 
 def main():
     print("starting visualizer...")

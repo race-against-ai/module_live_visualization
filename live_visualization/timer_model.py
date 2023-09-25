@@ -3,6 +3,7 @@ from PySide6.QtCore import QObject, Signal, Property
 
 # mypy: ignore-errors
 
+
 def pad_left(string: str, length: int, padchar: str = "0") -> str:
     string = padchar * (length - len(string)) + string[0:length]
     return string
@@ -21,7 +22,6 @@ class Model(QObject):
     sector_three_color_changed = Signal(name="sector_three_color_changed")
     split_time_changed = Signal(name="split_time_changed")
     trigger_delta_signal = Signal(name="trigger_delta_signal")
-
 
     def __init__(self, millis: int, seconds: int, minutes: int) -> None:
         QObject.__init__(self)
@@ -147,7 +147,6 @@ class Model(QObject):
     def trigger_delta(self) -> None:
         print("Signal emitted")
         self.trigger_delta_signal.emit()
-
 
     millis = Property(int, get_millis, set_millis, notify=millis_changed)
     seconds = Property(int, get_seconds, set_seconds, notify=seconds_changed)

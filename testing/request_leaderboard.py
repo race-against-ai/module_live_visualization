@@ -10,4 +10,3 @@ with pynng.Req0() as sock:
     sock.send(b"leaderboard_request")
     msg = sock.recv()
     print(msg.decode())
-        
