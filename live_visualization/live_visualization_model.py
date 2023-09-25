@@ -17,8 +17,9 @@ class DriverModel(QObject):
     time_improved = Signal(name="time_improved")
     gap_to_first_changed = Signal(name="gapToFirst")
     laps_completed_changed = Signal(name="lapsCompletedChanged")
+    active_changed = Signal(name="activeChanged")
 
-    def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "", gap_to_first: float = None, laps_completed: int = 0, active: bool = None) -> None:
+    def __init__(self, name: str, time: float, position: int = None, formatted_time: str = "", gap_to_first: float = None, laps_completed: int = 1, active: bool = None) -> None:
         QObject.__init__(self)
         self._name = name
         self._time = time
@@ -26,6 +27,7 @@ class DriverModel(QObject):
         self._formatted_time = formatted_time
         self._gap_to_first = gap_to_first
         self._laps_completed = laps_completed
+        self._active = active
   
     def get_name(self) -> str:
         return self._name
@@ -47,6 +49,9 @@ class DriverModel(QObject):
     
     def get_laps_completed(self) -> int:
         return self._laps_completed
+    
+    def get_active(self) -> bool:
+        return self._active
 
     def set_name(self, name: str) -> None:
         self._name = name
@@ -68,12 +73,16 @@ class DriverModel(QObject):
         self._laps_completed = laps_completed
         self.laps_completed_changed.emit()
 
+    def set_active(self, active: bool) -> None:
+        self._active = active
+
     name = Property(str, get_name, set_name, notify=name_changed)
     time = Property(float, get_time, set_time, notify=time_changed)
     position = Property(int, get_position, set_position, notify=position_changed)
     formatted_time = Property(str, get_formatted_time, notify=time_changed)
     gap_to_first = Property(float, get_gap_to_first, set_gap_to_first, notify=gap_to_first_changed)
     laps_completed = Property(int, get_laps_completed, set_laps_completed, notify=laps_completed_changed)
+    active = Property(bool, get_active, set_active, notify=active_changed)
 
 
 class LeaderboardModel(QObject):
@@ -166,9 +175,9 @@ class LeaderboardModel(QObject):
     def update_active_driver(self, driver_name: str) -> None:
         for driver in self._leaderboard_entries:
             if driver.name == driver_name:
-                driver.active = True
+                driver.set_active(True)
             else:
-                driver.active = False
+                driver.set_active(False)
 
     leaderboard = Property(list, get_leaderboard, update_leaderboard, notify=leaderboard_updated_signal)
 
