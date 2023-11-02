@@ -116,6 +116,7 @@ class DriverDataPublisher:
             self.drivers = self.saved_drivers
             self.listbox.delete(0, "end")
             self.show_list()
+            self.status_label.config(text="Refreshed driver list")
 
     def search_driver(self):
         print("Search driver")
