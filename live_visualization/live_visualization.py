@@ -28,10 +28,13 @@ class State(IntEnum):
 
 IMAGE_WIDTH = 1280
 IMAGE_HEIGHT = 720
+
+TRACKER_IMAGE_WIDTH = 1332
+TRACKER_IMAGE_HEIGHT = 990
 IMAGE_DEPTH = 3
 
 # The Address to which the broker publishes to
-IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/timer_frame.ipc"
+TRACKER_IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/tracker_frame.ipc"
 
 LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
 
@@ -46,9 +49,9 @@ def resource_path() -> Path:
 
 
 class StreamImageProvider(QQuickImageProvider):
-    def __init__(self) -> None:
+    def __init__(self, width: int, height: int) -> None:
         super(StreamImageProvider, self).__init__(QQuickImageProvider.Image)
-        self.img = QImage(IMAGE_WIDTH, IMAGE_HEIGHT, QImage.Format_RGB888)
+        self.img = QImage(width, height, QImage.Format_RGB888)
 
     def requestImage(self, id: str, size: QSize, requested_size: QSize) -> QImage:
         size = self.img.size()
@@ -70,18 +73,19 @@ class LiveVisualization:
 
         self.app = QGuiApplication(sys.argv)
         self.engine = QQmlApplicationEngine()
-        self.stream_image_provider = StreamImageProvider()
+        self.tracker_stream_image_provider = StreamImageProvider(TRACKER_IMAGE_WIDTH, TRACKER_IMAGE_HEIGHT)
+        self.stream_image_provider = StreamImageProvider(IMAGE_WIDTH, IMAGE_HEIGHT)
 
-        self.engine.addImageProvider("stream", self.stream_image_provider)
+        self.engine.addImageProvider("tracker_stream", self.tracker_stream_image_provider)
 
         self.engine.rootContext().setContextProperty("t_model", self.t_model)
         self.engine.rootContext().setContextProperty("live_visualization_model", self.live_visualization_model)
         self.engine.rootContext().setContextProperty("leaderboard_model", self.leaderboard_model)
         self.engine.load(resource_path() / "frontend/qml/main.qml")
 
-        self.image_sub = pynng.Sub0()
-        self.image_sub.subscribe("")
-        self.image_sub.dial(IMAGE_SUB_ADDRESS, block=False)
+        self.tracker_image_sub = pynng.Sub0()
+        self.tracker_image_sub.subscribe("")
+        self.tracker_image_sub.dial(TRACKER_IMAGE_SUB_ADDRESS, block=False)
 
         self.lap_sub = pynng.Sub0()
         self.lap_sub.subscribe("")
@@ -95,7 +99,7 @@ class LiveVisualization:
         self.sound_status_sub.subscribe("")
         self.sound_status_sub.dial(SOUNDSERVER_STATUS_SUB_ADDRESS, block=False)
 
-        self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
+        self._image_socket_notifier = QSocketNotifier(self.tracker_image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
         self._lap_socket_notifier = QSocketNotifier(self.lap_sub.recv_fd, QSocketNotifier.Read)
@@ -126,14 +130,15 @@ class LiveVisualization:
         # pass
 
     def check_if_image_available_pynng(self) -> bool:
-        socket_list = [self.image_sub.recv_fd]
+        socket_list = [self.tracker_image_sub.recv_fd]
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [], 0)
-        return self.image_sub in read_sockets
+        return self.tracker_image_sub in read_sockets
 
     def image_receiver_callback(self) -> None:
         try:
-            data = self.image_sub.recv()
-            self.stream_image_provider.img = QImage(data, IMAGE_WIDTH, IMAGE_HEIGHT, QImage.Format_RGB888)
+            data = self.tracker_image_sub.recv()
+            self.tracker_stream_image_provider.img = QImage(data, TRACKER_IMAGE_WIDTH, TRACKER_IMAGE_HEIGHT,
+                                                            QImage.Format_BGR888)
             self.live_visualization_model.reloadImage.emit()
         except:
             pass

@@ -52,10 +52,12 @@ Window {
 
         property int id: 0
 
-        anchors.fill: parent
+        anchors.centerIn: parent
+        height: parent.height
+        fillMode: Image.PreserveAspectFit
 
         cache: false
-        source: "image://stream/" + id
+        source: "image://tracker_stream/" + id
 
         function reload() {
             id++;
