@@ -199,3 +199,11 @@ class ModelLV(QObject):
     @Signal
     def reloadImage(self) -> None:
         pass
+
+    @Signal
+    def soundStarted(self) -> None:
+        pass
+
+    @Signal
+    def soundStopped(self) -> None:
+        pass

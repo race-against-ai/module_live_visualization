@@ -31,11 +31,13 @@ IMAGE_HEIGHT = 720
 IMAGE_DEPTH = 3
 
 # The Address to which the broker publishes to
-IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/broker.ipc"
+IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/timer_frame.ipc"
 
 LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
 
 LEADERBOARD_SUB_ADDRESS = "ipc:///tmp/RAAI/leaderboard.ipc"
+
+SOUNDSERVER_STATUS_SUB_ADDRESS = "ipc:///tmp/RAAI/sound_server_status.ipc"
 
 
 def resource_path() -> Path:
@@ -89,6 +91,10 @@ class LiveVisualization:
         self.leaderboard_sub.subscribe("")
         self.leaderboard_sub.dial(LEADERBOARD_SUB_ADDRESS, block=False)
 
+        self.sound_status_sub = pynng.Sub0()
+        self.sound_status_sub.subscribe("")
+        self.sound_status_sub.dial(SOUNDSERVER_STATUS_SUB_ADDRESS, block=False)
+
         self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
@@ -97,6 +103,9 @@ class LiveVisualization:
 
         self._leaderboard_socket_notifier = QSocketNotifier(self.leaderboard_sub.recv_fd, QSocketNotifier.Read)
         self._leaderboard_socket_notifier.activated.connect(self.leaderboard_receiver)
+
+        self._sound_status_socket_notifier = QSocketNotifier(self.sound_status_sub.recv_fd, QSocketNotifier.Read)
+        self._sound_status_socket_notifier.activated.connect(self.sound_status_receiver)
 
         # timer for counting
         self.lapTimer = QTimer()
@@ -229,6 +238,16 @@ class LiveVisualization:
         print("leaderboard_receiver() called")
 
         self.leaderboard_model.update_leaderboard(data)
+
+    def sound_status_receiver(self) -> None:
+        msg = self.sound_status_sub.recv()
+        print(msg.decode())
+        if msg.decode() == "running":
+            self.live_visualization_model.soundStarted.emit()
+        elif msg.decode() == "stopped":
+            self.live_visualization_model.soundStopped.emit()
+        else:
+            print("Invalid status!")
 
 
 def main():

@@ -101,14 +101,16 @@ Window {
         anchors.fill: parent
     }
 
-
+    TeamRadio {
+        id: teamRadio
+        anchors.fill: parent
+    }
 
     Connections {
         target: live_visualization_model
 
         function onReloadImage() {
             testImage.reload()
-
         }
     }
 }
