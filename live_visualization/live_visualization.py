@@ -5,18 +5,21 @@ from pathlib import Path
 import select
 import time
 import pynng
-import json
 
 from PySide6.QtGui import QGuiApplication, QImage
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
+from pathlib import Path
+from json import dumps, load
 
 from live_visualization.live_visualization_model import ModelLV, DriverModel, LeaderboardModel
 from live_visualization.timer_model import Model
 
 # mypy: ignore-errors
+
+CURRENT_DIR = Path(__file__).parent
 
 
 class State(IntEnum):
@@ -24,25 +27,6 @@ class State(IntEnum):
     RUNNING = 1
     PAUSED = 2
     STOPPED = 3
-
-
-IMAGE_WIDTH = 1280
-IMAGE_HEIGHT = 720
-
-TRACKER_IMAGE_WIDTH = 1332
-TRACKER_IMAGE_HEIGHT = 990
-IMAGE_DEPTH = 3
-
-# The Address to which the broker publishes to
-TRACKER_IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/tracker_frame.ipc"
-
-IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/Broker.ipc"
-
-LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
-
-LEADERBOARD_SUB_ADDRESS = "ipc:///tmp/RAAI/leaderboard.ipc"
-
-SOUNDSERVER_STATUS_SUB_ADDRESS = "ipc:///tmp/RAAI/sound_server_status.ipc"
 
 
 def resource_path() -> Path:
@@ -64,9 +48,28 @@ class StreamImageProvider(QQuickImageProvider):
 
 
 class LiveVisualization:
-    def __init__(self) -> None:
+    def __init__(self,
+                 config_path: Path = CURRENT_DIR.parent / "live_visualization_config.json"
+                 ) -> None:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
+
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = load(f)
+            self.__stream_receiver_address: str = config["pynng"]["subscribers"]["stream_receiver"]["address"]
+            self.__tracker_stream_receiver_address: str = config["pynng"]["subscribers"]["tracker_stream_receiver"]["address"]
+            self.__time_tracking_receiver_address: str = config["pynng"]["subscribers"]["time_tracking_receiver"]["address"]
+            self.__sound_server_status_receiver_address: str = config["pynng"]["subscribers"]["sound_server_status_receiver"]["address"]
+            self.__leaderboard_receiver_address: str = config["pynng"]["subscribers"]["leaderboard_receiver"]["address"]
+
+            self.__vr_stream_height: int = config["image_dimensions"]["vr_stream"]["height"]
+            self.__vr_stream_width: int = config["image_dimensions"]["vr_stream"]["width"]
+
+            self.__tracker_stream_height: int = config["image_dimensions"]["tracker_stream"]["height"]
+            self.__tracker_stream_width: int = config["image_dimensions"]["tracker_stream"]["width"]
+
+            self.__stream_depth: int = config["image_dimensions"]["image_depth"]
+
         self.t_model = Model(0, 0, 0)
 
         self.leaderboard_model = LeaderboardModel()
@@ -75,8 +78,10 @@ class LiveVisualization:
 
         self.app = QGuiApplication(sys.argv)
         self.engine = QQmlApplicationEngine()
-        self.tracker_stream_image_provider = StreamImageProvider(TRACKER_IMAGE_WIDTH, TRACKER_IMAGE_HEIGHT)
-        self.stream_image_provider = StreamImageProvider(IMAGE_WIDTH, IMAGE_HEIGHT)
+        self.tracker_stream_image_provider = StreamImageProvider(self.__tracker_stream_width,
+                                                                 self.__tracker_stream_height)
+        self.stream_image_provider = StreamImageProvider(self.__vr_stream_width,
+                                                         self.__vr_stream_height)
 
         self.engine.addImageProvider("tracker_stream", self.tracker_stream_image_provider)
         self.engine.addImageProvider("stream", self.stream_image_provider)
@@ -88,23 +93,23 @@ class LiveVisualization:
 
         self.tracker_image_sub = pynng.Sub0()
         self.tracker_image_sub.subscribe("")
-        self.tracker_image_sub.dial(TRACKER_IMAGE_SUB_ADDRESS, block=False)
+        self.tracker_image_sub.dial(self.__tracker_stream_receiver_address, block=False)
 
         self.image_sub = pynng.Sub0()
         self.image_sub.subscribe("")
-        self.image_sub.dial(IMAGE_SUB_ADDRESS, block=False)
+        self.image_sub.dial(self.__stream_receiver_address, block=False)
 
         self.lap_sub = pynng.Sub0()
         self.lap_sub.subscribe("")
-        self.lap_sub.dial(LAPTIME_SUB_ADDRESS, block=False)
+        self.lap_sub.dial(self.__time_tracking_receiver_address, block=False)
 
         self.leaderboard_sub = pynng.Sub0()
         self.leaderboard_sub.subscribe("")
-        self.leaderboard_sub.dial(LEADERBOARD_SUB_ADDRESS, block=False)
+        self.leaderboard_sub.dial(self.__leaderboard_receiver_address, block=False)
 
         self.sound_status_sub = pynng.Sub0()
         self.sound_status_sub.subscribe("")
-        self.sound_status_sub.dial(SOUNDSERVER_STATUS_SUB_ADDRESS, block=False)
+        self.sound_status_sub.dial(self.__sound_server_status_receiver_address, block=False)
 
         self._tracker_image_socket_notifier = QSocketNotifier(self.tracker_image_sub.recv_fd, QSocketNotifier.Read)
         self._tracker_image_socket_notifier.activated.connect(self.tracker_image_receiver_callback)
@@ -147,7 +152,8 @@ class LiveVisualization:
     def tracker_image_receiver_callback(self) -> None:
         try:
             data = self.tracker_image_sub.recv()
-            self.tracker_stream_image_provider.img = QImage(data, TRACKER_IMAGE_WIDTH, TRACKER_IMAGE_HEIGHT,
+            self.tracker_stream_image_provider.img = QImage(data, self.__tracker_stream_width,
+                                                            self.__tracker_stream_height,
                                                             QImage.Format_BGR888)
             self.live_visualization_model.reloadImage.emit()
         except:
@@ -156,7 +162,8 @@ class LiveVisualization:
     def image_receiver_callback(self) -> None:
         try:
             data = self.image_sub.recv()
-            self.stream_image_provider.img = QImage(data, IMAGE_WIDTH, IMAGE_HEIGHT,
+            self.stream_image_provider.img = QImage(data, self.__vr_stream_width,
+                                                    self.__vr_stream_height,
                                                     QImage.Format_RGB888)
             self.live_visualization_model.reloadImage.emit()
         except:
