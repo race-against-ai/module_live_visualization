@@ -42,19 +42,22 @@ class DriverDataPublisher:
         self.driver_label = tk.Label(self.app, text="Enter the name:")
         self.driver_entry = tk.Entry(self.app, width=50)
         self.search_button = tk.Button(self.app, text="Search", command=self.search_driver, width=10)
+        self.send_button = tk.Button(self.app, text="Debug: Send", command=lambda: self.send_data(self.driver_entry.get()), width=10)
         self.create_button = tk.Button(self.app, text="Create", command=self.create_driver, width=10)
         self.refresh_button = tk.Button(self.app, text="Refresh", command=self.refresh_driver, width=10)
         self.status_label = tk.Label(self.app, text="")
-        self.app.bind("<Return>", lambda event=None: self.send_data())
+
+        # self.app.bind("<Return>", lambda event=None: self.send_data()) 
 
         self.driver_label.grid(row=0, column=0, padx=10, pady=10)
         self.driver_entry.grid(row=0, column=1, padx=10, pady=10)
         self.search_button.grid(row=1, column=0, padx=10, pady=10)
         self.create_button.grid(row=1, column=1, padx=10, pady=10)
+        self.send_button.grid(row=2, column=0, padx=10, pady=10)
         self.refresh_button.grid(row=2, column=1, padx=10, pady=10)
         self.status_label.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
-        self.listbox = tk.Listbox(self.app, width=70, height=10)
+        self.listbox = tk.Listbox(self.app, width=90, height=10)
         self.listbox.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
@@ -65,7 +68,15 @@ class DriverDataPublisher:
     
     def show_list(self):
         for driver in self.drivers:
-            self.listbox.insert("end", f"{driver['name']}       |       {driver['id']}")
+            name = driver['name']
+            if len(name) > 20:
+                name = name[:20]  # Truncate the name to 20 characters
+            # print(len(driver['id']))
+            self.listbox.insert("end", f"{name:<20}     |   {driver['id']:<36}      |       {driver['created']:<10}")
+
+    def sort_drivers(self, drivers):
+        drivers.sort(key=lambda x: x['created'], reverse=True)
+        return drivers
 
     def on_select(self, event):
         index = self.listbox.curselection()[0]
@@ -111,7 +122,9 @@ class DriverDataPublisher:
         
         else:
             response = json.loads(response)
-            # search for driver
+            # sort the drivers by created date
+            response = self.sort_drivers(response)
+
             self.saved_drivers = response
             self.drivers = self.saved_drivers
             self.listbox.delete(0, "end")
@@ -138,6 +151,7 @@ class DriverDataPublisher:
         if response:
             try:
                 self.drivers.append(json.loads(response))
+                self.drivers = self.sort_drivers(self.drivers)
                 self.status_label.config(text="created driver: " + name)
                 self.listbox.delete(0, "end")
                 self.show_list()
