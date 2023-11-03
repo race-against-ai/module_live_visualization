@@ -208,11 +208,13 @@ class LiveVisualization:
         msg = self.lap_sub.recv()
         decoded_data: str = msg.decode()
         i = decoded_data.find(" ")
-        decoded_data = decoded_data[i + 1 :]
+        decoded_data = decoded_data[i + 1:]
         data = json.loads(decoded_data)
+        print(data)
 
         if "lap_best_time" in data:
-            self.leaderboard_model.update_active_driver(data["current_driver"])
+            print("Lap started!")
+            #self.leaderboard_model.update_active_driver(data["current_driver"])
 
             self.t_model.set_best_time(int(data["lap_best_time"] * 1000000000))
             self.start_stop_button_clicked()
@@ -239,7 +241,7 @@ class LiveVisualization:
             if data["lap_valid"]:
                 self.t_model.set_split_time(self.t_model.get_lap_time_difference(data["lap_time"] * 1000000000))
                 self.t_model.trigger_delta()
-                self.set_leaderboard(data["curent_driver"], data["lap_time"])
+                self.set_leaderboard(data["current_driver"], data["lap_time"])
 
     def _update_sector_color(self, sector, color) -> None:
         match sector:
