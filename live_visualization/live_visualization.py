@@ -36,6 +36,8 @@ IMAGE_DEPTH = 3
 # The Address to which the broker publishes to
 TRACKER_IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/tracker_frame.ipc"
 
+IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/Broker.ipc"
+
 LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
 
 LEADERBOARD_SUB_ADDRESS = "ipc:///tmp/RAAI/leaderboard.ipc"
@@ -77,6 +79,7 @@ class LiveVisualization:
         self.stream_image_provider = StreamImageProvider(IMAGE_WIDTH, IMAGE_HEIGHT)
 
         self.engine.addImageProvider("tracker_stream", self.tracker_stream_image_provider)
+        self.engine.addImageProvider("stream", self.stream_image_provider)
 
         self.engine.rootContext().setContextProperty("t_model", self.t_model)
         self.engine.rootContext().setContextProperty("live_visualization_model", self.live_visualization_model)
@@ -86,6 +89,10 @@ class LiveVisualization:
         self.tracker_image_sub = pynng.Sub0()
         self.tracker_image_sub.subscribe("")
         self.tracker_image_sub.dial(TRACKER_IMAGE_SUB_ADDRESS, block=False)
+
+        self.image_sub = pynng.Sub0()
+        self.image_sub.subscribe("")
+        self.image_sub.dial(IMAGE_SUB_ADDRESS, block=False)
 
         self.lap_sub = pynng.Sub0()
         self.lap_sub.subscribe("")
@@ -99,7 +106,10 @@ class LiveVisualization:
         self.sound_status_sub.subscribe("")
         self.sound_status_sub.dial(SOUNDSERVER_STATUS_SUB_ADDRESS, block=False)
 
-        self._image_socket_notifier = QSocketNotifier(self.tracker_image_sub.recv_fd, QSocketNotifier.Read)
+        self._tracker_image_socket_notifier = QSocketNotifier(self.tracker_image_sub.recv_fd, QSocketNotifier.Read)
+        self._tracker_image_socket_notifier.activated.connect(self.tracker_image_receiver_callback)
+
+        self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
         self._lap_socket_notifier = QSocketNotifier(self.lap_sub.recv_fd, QSocketNotifier.Read)
@@ -134,11 +144,20 @@ class LiveVisualization:
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [], 0)
         return self.tracker_image_sub in read_sockets
 
-    def image_receiver_callback(self) -> None:
+    def tracker_image_receiver_callback(self) -> None:
         try:
             data = self.tracker_image_sub.recv()
             self.tracker_stream_image_provider.img = QImage(data, TRACKER_IMAGE_WIDTH, TRACKER_IMAGE_HEIGHT,
                                                             QImage.Format_BGR888)
+            self.live_visualization_model.reloadImage.emit()
+        except:
+            pass
+
+    def image_receiver_callback(self) -> None:
+        try:
+            data = self.image_sub.recv()
+            self.stream_image_provider.img = QImage(data, IMAGE_WIDTH, IMAGE_HEIGHT,
+                                                    QImage.Format_RGB888)
             self.live_visualization_model.reloadImage.emit()
         except:
             pass

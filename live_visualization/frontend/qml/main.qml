@@ -48,13 +48,33 @@ Window {
 
     Image {
 
-        id: testImage
+        id: stream
 
         property int id: 0
 
-        anchors.centerIn: parent
-        height: parent.height
+        anchors.fill: parent
         fillMode: Image.PreserveAspectFit
+
+        visible: false
+
+        cache: false
+        source: "image://stream/" + id
+
+        function reload() {
+            id++;
+        }
+    }
+
+    Image {
+
+        id: trackerStream
+
+        property int id: 0
+
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+
+        visible: true
 
         cache: false
         source: "image://tracker_stream/" + id
@@ -108,11 +128,42 @@ Window {
         anchors.fill: parent
     }
 
+    CostumButton {
+        id: trackerImageButton
+        anchors.right: parent.right
+        anchors.top: logoAutostadt.bottom
+        height: parent.height * 0.05
+        width: window.width * 0.1
+        text: "Tracker View"
+
+        onClicked: {
+            console.log("Tracker View enabled!")
+            trackerStream.visible = true
+            stream.visible = false
+        }
+    }
+
+    CostumButton {
+        id: imageButton
+        anchors.right: parent.right
+        anchors.top: trackerImageButton.bottom
+        height: parent.height * 0.05
+        width: window.width * 0.1
+        text: "VR View"
+
+        onClicked: {
+            console.log("Stream view enabled")
+            stream.visible = true
+            trackerStream.visible = false
+        }
+    }
+
     Connections {
         target: live_visualization_model
 
         function onReloadImage() {
-            testImage.reload()
+            trackerStream.reload()
+            stream.reload()
         }
     }
 }
