@@ -12,7 +12,7 @@ from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
 from pathlib import Path
-from json import dumps, load
+from json import dumps, load, dump
 
 from live_visualization.live_visualization_model import ModelLV, DriverModel, LeaderboardModel
 from live_visualization.timer_model import Model
@@ -20,6 +20,7 @@ from live_visualization.timer_model import Model
 # mypy: ignore-errors
 
 CURRENT_DIR = Path(__file__).parent
+CONFIG_FILE_PATH = CURRENT_DIR.parent / "live_visualization_config.json"
 
 
 class State(IntEnum):
@@ -53,6 +54,12 @@ class LiveVisualization:
                  ) -> None:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
+
+        if not CONFIG_FILE_PATH.exists():
+            with open(CONFIG_FILE_PATH, "w", encoding="utf-8") as config, open(
+                CURRENT_DIR / "templates/live_visualization_config.json", "r", encoding="utf-8"
+            ) as template_file:
+                dump(load(template_file), config, indent=4)
 
         with open(config_path, "r", encoding="utf-8") as f:
             config = load(f)
@@ -89,7 +96,7 @@ class LiveVisualization:
         self.engine.rootContext().setContextProperty("t_model", self.t_model)
         self.engine.rootContext().setContextProperty("live_visualization_model", self.live_visualization_model)
         self.engine.rootContext().setContextProperty("leaderboard_model", self.leaderboard_model)
-        self.engine.load(resource_path() / "frontend/qml/main.qml")
+        self.engine.load(resource_path() / "live_visualization/frontend/qml/main.qml")
 
         self.tracker_image_sub = pynng.Sub0()
         self.tracker_image_sub.subscribe("")

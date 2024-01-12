@@ -20,5 +20,6 @@ setup(
     url="https://github.com/vw-wob-it-edu-ngitl/raai_module_live_visualization",
     packages=find_packages(),
     long_description=read("README.md"),
-    install_requires=["pynng~=0.7.2"],
+    install_requires=["pynng~=0.7.2", "pyside6"],
+    include_package_data=True,
 )

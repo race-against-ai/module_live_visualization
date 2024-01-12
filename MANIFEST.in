@@ -1,0 +1,9 @@
+include live_visualization/templates/*.json
+include live_visualization/schemas/*.json
+include live_visualization/frontend/qml/*.qml
+include live_visualization/frontend/qml/items/*.qml
+include live_visualization/frontend/images/img/*.svg
+include live_visualization/frontend/images/svg/*.svg
+include live_visualization/frontend/images/svg_extracted_layers/*.svg
+include live_visualization/frontend/fonts/*.otf
+include live_visualization/frontend/fonts/*.ttf
