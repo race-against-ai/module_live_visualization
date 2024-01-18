@@ -49,9 +49,7 @@ class StreamImageProvider(QQuickImageProvider):
 
 
 class LiveVisualization:
-    def __init__(self,
-                 config_path: Path = CURRENT_DIR.parent / "live_visualization_config.json"
-                 ) -> None:
+    def __init__(self, config_path: Path = CURRENT_DIR.parent / "live_visualization_config.json") -> None:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
 
@@ -64,9 +62,15 @@ class LiveVisualization:
         with open(config_path, "r", encoding="utf-8") as f:
             config = load(f)
             self.__stream_receiver_address: str = config["pynng"]["subscribers"]["stream_receiver"]["address"]
-            self.__tracker_stream_receiver_address: str = config["pynng"]["subscribers"]["tracker_stream_receiver"]["address"]
-            self.__time_tracking_receiver_address: str = config["pynng"]["subscribers"]["time_tracking_receiver"]["address"]
-            self.__sound_server_status_receiver_address: str = config["pynng"]["subscribers"]["sound_server_status_receiver"]["address"]
+            self.__tracker_stream_receiver_address: str = config["pynng"]["subscribers"]["tracker_stream_receiver"][
+                "address"
+            ]
+            self.__time_tracking_receiver_address: str = config["pynng"]["subscribers"]["time_tracking_receiver"][
+                "address"
+            ]
+            self.__sound_server_status_receiver_address: str = config["pynng"]["subscribers"][
+                "sound_server_status_receiver"
+            ]["address"]
             self.__leaderboard_receiver_address: str = config["pynng"]["subscribers"]["leaderboard_receiver"]["address"]
 
             self.__vr_stream_height: int = config["image_dimensions"]["vr_stream"]["height"]
@@ -85,10 +89,10 @@ class LiveVisualization:
 
         self.app = QGuiApplication(sys.argv)
         self.engine = QQmlApplicationEngine()
-        self.tracker_stream_image_provider = StreamImageProvider(self.__tracker_stream_width,
-                                                                 self.__tracker_stream_height)
-        self.stream_image_provider = StreamImageProvider(self.__vr_stream_width,
-                                                         self.__vr_stream_height)
+        self.tracker_stream_image_provider = StreamImageProvider(
+            self.__tracker_stream_width, self.__tracker_stream_height
+        )
+        self.stream_image_provider = StreamImageProvider(self.__vr_stream_width, self.__vr_stream_height)
 
         self.engine.addImageProvider("tracker_stream", self.tracker_stream_image_provider)
         self.engine.addImageProvider("stream", self.stream_image_provider)
@@ -159,9 +163,9 @@ class LiveVisualization:
     def tracker_image_receiver_callback(self) -> None:
         try:
             data = self.tracker_image_sub.recv()
-            self.tracker_stream_image_provider.img = QImage(data, self.__tracker_stream_width,
-                                                            self.__tracker_stream_height,
-                                                            QImage.Format_BGR888)
+            self.tracker_stream_image_provider.img = QImage(
+                data, self.__tracker_stream_width, self.__tracker_stream_height, QImage.Format_BGR888
+            )
             self.live_visualization_model.reloadImage.emit()
         except:
             pass
@@ -169,9 +173,9 @@ class LiveVisualization:
     def image_receiver_callback(self) -> None:
         try:
             data = self.image_sub.recv()
-            self.stream_image_provider.img = QImage(data, self.__vr_stream_width,
-                                                    self.__vr_stream_height,
-                                                    QImage.Format_RGB888)
+            self.stream_image_provider.img = QImage(
+                data, self.__vr_stream_width, self.__vr_stream_height, QImage.Format_RGB888
+            )
             self.live_visualization_model.reloadImage.emit()
         except:
             pass
@@ -222,13 +226,13 @@ class LiveVisualization:
         msg = self.lap_sub.recv()
         decoded_data: str = msg.decode()
         i = decoded_data.find(" ")
-        decoded_data = decoded_data[i + 1:]
+        decoded_data = decoded_data[i + 1 :]
         data = json.loads(decoded_data)
         print(data)
 
         if "lap_best_time" in data:
             print("Lap started!")
-            #self.leaderboard_model.update_active_driver(data["current_driver"])
+            # self.leaderboard_model.update_active_driver(data["current_driver"])
 
             self.t_model.set_best_time(int(data["lap_best_time"] * 1000000000))
             self.start_stop_button_clicked()
