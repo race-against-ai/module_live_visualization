@@ -1,5 +1,4 @@
 # Copyright (C) 2023, NG:ITL
-import os
 import sys
 from pathlib import Path
 import select
@@ -12,9 +11,9 @@ from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
 from pathlib import Path
-from json import dumps, load, dump
+from json import load, dump
 
-from live_visualization.live_visualization_model import ModelLV, DriverModel, LeaderboardModel
+from live_visualization.live_visualization_model import ModelLV, LeaderboardModel
 from live_visualization.timer_model import Model
 
 # mypy: ignore-errors
@@ -102,39 +101,39 @@ class LiveVisualization:
         self.engine.rootContext().setContextProperty("leaderboard_model", self.leaderboard_model)
         self.engine.load(resource_path() / "live_visualization/frontend/qml/main.qml")
 
-        self.tracker_image_sub = pynng.Sub0()
-        self.tracker_image_sub.subscribe("")
-        self.tracker_image_sub.dial(self.__tracker_stream_receiver_address, block=False)
+        self._tracker_image_sub = pynng.Sub0()
+        self._tracker_image_sub.subscribe("")
+        self._tracker_image_sub.dial(self.__tracker_stream_receiver_address, block=False)
 
         self.image_sub = pynng.Sub0()
         self.image_sub.subscribe("")
         self.image_sub.dial(self.__stream_receiver_address, block=False)
 
-        self.lap_sub = pynng.Sub0()
-        self.lap_sub.subscribe("")
-        self.lap_sub.dial(self.__time_tracking_receiver_address, block=False)
+        self._lap_sub = pynng.Sub0()
+        self._lap_sub.subscribe("")
+        self._lap_sub.dial(self.__time_tracking_receiver_address, block=False)
 
-        self.leaderboard_sub = pynng.Sub0()
-        self.leaderboard_sub.subscribe("")
-        self.leaderboard_sub.dial(self.__leaderboard_receiver_address, block=False)
+        self._leaderboard_sub = pynng.Sub0()
+        self._leaderboard_sub.subscribe("")
+        self._leaderboard_sub.dial(self.__leaderboard_receiver_address, block=False)
 
-        self.sound_status_sub = pynng.Sub0()
-        self.sound_status_sub.subscribe("")
-        self.sound_status_sub.dial(self.__sound_server_status_receiver_address, block=False)
+        self._sound_status_sub = pynng.Sub0()
+        self._sound_status_sub.subscribe("")
+        self._sound_status_sub.dial(self.__sound_server_status_receiver_address, block=False)
 
-        self._tracker_image_socket_notifier = QSocketNotifier(self.tracker_image_sub.recv_fd, QSocketNotifier.Read)
+        self._tracker_image_socket_notifier = QSocketNotifier(self._tracker_image_sub.recv_fd, QSocketNotifier.Read)
         self._tracker_image_socket_notifier.activated.connect(self.tracker_image_receiver_callback)
 
         self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
-        self._lap_socket_notifier = QSocketNotifier(self.lap_sub.recv_fd, QSocketNotifier.Read)
+        self._lap_socket_notifier = QSocketNotifier(self._lap_sub.recv_fd, QSocketNotifier.Read)
         self._lap_socket_notifier.activated.connect(self.time_receiver)
 
-        self._leaderboard_socket_notifier = QSocketNotifier(self.leaderboard_sub.recv_fd, QSocketNotifier.Read)
+        self._leaderboard_socket_notifier = QSocketNotifier(self._leaderboard_sub.recv_fd, QSocketNotifier.Read)
         self._leaderboard_socket_notifier.activated.connect(self.leaderboard_receiver)
 
-        self._sound_status_socket_notifier = QSocketNotifier(self.sound_status_sub.recv_fd, QSocketNotifier.Read)
+        self._sound_status_socket_notifier = QSocketNotifier(self._sound_status_sub.recv_fd, QSocketNotifier.Read)
         self._sound_status_socket_notifier.activated.connect(self.sound_status_receiver)
 
         # timer for counting
@@ -151,18 +150,22 @@ class LiveVisualization:
             sys.exit(-1)
         print("started")
         self.app.exec()
-        # except:
-        # print("failed")
-        # pass
 
     def check_if_image_available_pynng(self) -> bool:
-        socket_list = [self.tracker_image_sub.recv_fd]
+        """
+        Check if an image is available on the pynng socket.
+
+        Returns:
+            bool: True if an image is available, False otherwise.
+        """
+
+        socket_list = [self._tracker_image_sub.recv_fd]
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [], 0)
-        return self.tracker_image_sub in read_sockets
+        return self._tracker_image_sub in read_sockets
 
     def tracker_image_receiver_callback(self) -> None:
         try:
-            data = self.tracker_image_sub.recv()
+            data = self._tracker_image_sub.recv()
             self.tracker_stream_image_provider.img = QImage(
                 data, self.__tracker_stream_width, self.__tracker_stream_height, QImage.Format_BGR888
             )
@@ -182,6 +185,10 @@ class LiveVisualization:
 
     # the counter for the timer, basically the timer itself
     def lapTimer_callback(self) -> None:
+        """
+        Callback function for the lap timer. Updates the timer's timestamp.
+        """
+
         current_timestamp_ns = time.time_ns()
         self.diff = current_timestamp_ns - self.start_timestamp_ns
         self.t_model.set_timestamp(self.diff)
@@ -223,7 +230,11 @@ class LiveVisualization:
         self.timer_state = State.RESET
 
     def time_receiver(self) -> None:
-        msg = self.lap_sub.recv()
+        """
+        Receive time data.
+        """
+
+        msg = self._lap_sub.recv()
         decoded_data: str = msg.decode()
         i = decoded_data.find(" ")
         decoded_data = decoded_data[i + 1 :]
@@ -274,7 +285,7 @@ class LiveVisualization:
         self.leaderboard_model.update_leaderboard({driver: time})
 
     def leaderboard_receiver(self) -> None:
-        msg = self.leaderboard_sub.recv_msg()
+        msg = self._leaderboard_sub.recv_msg()
         decoded_data: str = msg.bytes.decode()
         i = decoded_data.find(" ")
         decoded_data = decoded_data[i + 1 :]
@@ -284,7 +295,7 @@ class LiveVisualization:
         self.leaderboard_model.update_leaderboard(data)
 
     def sound_status_receiver(self) -> None:
-        msg = self.sound_status_sub.recv()
+        msg = self._sound_status_sub.recv()
         print(msg.decode())
         if msg.decode() == "running":
             self.live_visualization_model.soundStarted.emit()
