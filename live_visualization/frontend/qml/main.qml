@@ -23,7 +23,12 @@ Window {
 
     FontLoader {
             id: fontLoader
-            source: "../fonts/Exo-Bold.otf"
+            source: "../fonts/Formula1-Regular.otf"
+    }
+
+    FontLoader {
+        id: fontLoaderWide
+        source: "../fonts/Formula1-Bold.otf"
     }
 
     MouseArea {
@@ -43,14 +48,36 @@ Window {
 
     Image {
 
-        id: testImage
+        id: stream
 
         property int id: 0
 
         anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+
+        visible: false
 
         cache: false
         source: "image://stream/" + id
+
+        function reload() {
+            id++;
+        }
+    }
+
+    Image {
+
+        id: trackerStream
+
+        property int id: 0
+
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+
+        visible: true
+
+        cache: false
+        source: "image://tracker_stream/" + id
 
         function reload() {
             id++;
@@ -64,10 +91,11 @@ Window {
         radius: 10
         width: title.width * 1.1
         height: window.height * 0.1
+        opacity: 0.8
 
         Text {
             id: title
-            font.family: fontLoader.name
+            font.family: fontLoaderWide.name
             text: "Race Against AI"
             color: "black"
             x: parent.width / 2 - width / 2
@@ -77,67 +105,65 @@ Window {
     }
 
     Svg {
-        id: logoVolkswagen
-        source: "./../images/img/Volkswagen_logo_2019.svg"
-//        x: parent.width - parent.width*0.99
-//        y: parent.height - parent.height*0.99
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.leftMargin: parent.width * 0.01
-        anchors.topMargin: parent.height * 0.01
-        fillMode: Image.PreserveAspectFit
-        height: parent.height * 0.09
-
-
-    }
-
-    Svg {
         id: logoAutostadt
         source: "./../images/img/Autostadt_Logo.svg"
-//        x: parent.width - parent.width*0.95
-//        y: parent.height - parent.height*0.99
-        anchors.top: logoVolkswagen.top
-        anchors.left: logoVolkswagen.right
-        anchors.leftMargin: parent.width * 0.01
+        x: parent.width * 0.98 - width
+        y: window.height * 0.01
         fillMode: Image.PreserveAspectFit
-        height: parent.height*0.09
-    }
-
-    Svg {
-        id: ngitl_logo
-        source: "./../images/img/ngitl_black.svg"
-        visible: true
-        anchors.top: parent.top
-        anchors.right: parent.right
-        fillMode: Image.PreserveAspectFit
-        height: parent.height * 0.09
+        height: parent.height*0.1
     }
 
     Sectors {
         id: sectors
         anchors.fill: parent
     }
-//Item {
-//	id: aiviewItem
-//	anchors.fill: parent
 
-//	AIView {
-//		id: aiview
-//		anchors.fill: parent
-//	}
-//}
-//    Text {
-//        id: test_text
-//        text: "test"
-//        visible: true
-//    }
+    LeaderboardNew {
+        id:leaderboardItem
+        anchors.fill: parent
+    }
+
+    TeamRadio {
+        id: teamRadio
+        anchors.fill: parent
+    }
+
+    CostumButton {
+        id: trackerImageButton
+        anchors.right: parent.right
+        anchors.top: logoAutostadt.bottom
+        height: parent.height * 0.05
+        width: window.width * 0.1
+        text: "Tracker View"
+
+        onClicked: {
+            console.log("Tracker View enabled!")
+            trackerStream.visible = true
+            stream.visible = false
+        }
+    }
+
+    CostumButton {
+        id: imageButton
+        anchors.right: parent.right
+        anchors.top: trackerImageButton.bottom
+        height: parent.height * 0.05
+        width: window.width * 0.1
+        text: "VR View"
+
+        onClicked: {
+            console.log("Stream view enabled")
+            stream.visible = true
+            trackerStream.visible = false
+        }
+    }
 
     Connections {
         target: live_visualization_model
 
         function onReloadImage() {
-            testImage.reload()
-
+            trackerStream.reload()
+            stream.reload()
         }
     }
 }

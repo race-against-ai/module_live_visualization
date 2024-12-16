@@ -1,0 +1,40 @@
+{
+  "pynng": {
+    "publishers": {
+
+    },
+    "subscribers": {
+      "stream_receiver": {
+        "address": "ipc:///tmp/RAAI/broker.ipc",
+        "topics": {}
+      },
+      "tracker_stream_receiver": {
+        "address": "ipc:///tmp/RAAI/tracker_frame.ipc",
+        "topics": {}
+        },
+      "time_tracking_receiver": {
+        "address": "ipc:///tmp/RAAI/time_tracking.ipc",
+        "topics": {}
+      },
+      "sound_server_status_receiver": {
+        "address": "ipc:///tmp/RAAI/sound_server_status.ipc",
+        "topics": {}
+      },
+      "leaderboard_receiver": {
+        "address": "ipc:///tmp/RAAI/leaderboard.ipc",
+        "topics": {}
+      }
+    }
+  },
+  "image_dimensions": {
+    "vr_stream": {
+      "height": 720,
+      "width": 1280
+    },
+    "tracker_stream": {
+      "height": 990,
+      "width": 1332
+    },
+    "image_depth": 3
+  }
+}

@@ -1,20 +1,25 @@
 # Copyright (C) 2023, NG:ITL
-import os
 import sys
 from pathlib import Path
 import select
 import time
 import pynng
-import json
 
 from PySide6.QtGui import QGuiApplication, QImage
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QTimer, Qt, QSize, QSocketNotifier
 from PySide6.QtQuick import QQuickImageProvider
 from enum import IntEnum
+from pathlib import Path
+from json import load, dump
 
-from live_visualization.live_visualization_model import ModelLV
+from live_visualization.live_visualization_model import ModelLV, LeaderboardModel
 from live_visualization.timer_model import Model
+
+# mypy: ignore-errors
+
+CURRENT_DIR = Path(__file__).parent
+CONFIG_FILE_PATH = CURRENT_DIR.parent / "live_visualization_config.json"
 
 
 class State(IntEnum):
@@ -24,25 +29,15 @@ class State(IntEnum):
     STOPPED = 3
 
 
-IMAGE_WIDTH = 1280
-IMAGE_HEIGHT = 720
-IMAGE_DEPTH = 3
-
-# The Address to which the broker publishes to
-IMAGE_SUB_ADDRESS = "ipc:///tmp/RAAI/broker.ipc"
-
-LAPTIME_SUB_ADDRESS = "ipc:///tmp/RAAI/lap_times.ipc"
-
-
 def resource_path() -> Path:
     base_path = getattr(sys, "_MEIPASS", Path(__file__).parent)
     return Path(base_path)
 
 
 class StreamImageProvider(QQuickImageProvider):
-    def __init__(self) -> None:
+    def __init__(self, width: int, height: int) -> None:
         super(StreamImageProvider, self).__init__(QQuickImageProvider.Image)
-        self.img = QImage(IMAGE_WIDTH, IMAGE_HEIGHT, QImage.Format_RGB888)
+        self.img = QImage(width, height, QImage.Format_RGB888)
 
     def requestImage(self, id: str, size: QSize, requested_size: QSize) -> QImage:
         size = self.img.size()
@@ -53,36 +48,93 @@ class StreamImageProvider(QQuickImageProvider):
 
 
 class LiveVisualization:
-    def __init__(self) -> None:
+    def __init__(self, config_path: Path = CURRENT_DIR.parent / "live_visualization_config.json") -> None:
         self.start_timestamp_ns = time.time_ns()
         self.diff = 0
+
+        if not CONFIG_FILE_PATH.exists():
+            with open(CONFIG_FILE_PATH, "w", encoding="utf-8") as config, open(
+                CURRENT_DIR / "templates/live_visualization_config.json", "r", encoding="utf-8"
+            ) as template_file:
+                dump(load(template_file), config, indent=4)
+
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = load(f)
+            self.__stream_receiver_address: str = config["pynng"]["subscribers"]["stream_receiver"]["address"]
+            self.__tracker_stream_receiver_address: str = config["pynng"]["subscribers"]["tracker_stream_receiver"][
+                "address"
+            ]
+            self.__time_tracking_receiver_address: str = config["pynng"]["subscribers"]["time_tracking_receiver"][
+                "address"
+            ]
+            self.__sound_server_status_receiver_address: str = config["pynng"]["subscribers"][
+                "sound_server_status_receiver"
+            ]["address"]
+            self.__leaderboard_receiver_address: str = config["pynng"]["subscribers"]["leaderboard_receiver"]["address"]
+
+            self.__vr_stream_height: int = config["image_dimensions"]["vr_stream"]["height"]
+            self.__vr_stream_width: int = config["image_dimensions"]["vr_stream"]["width"]
+
+            self.__tracker_stream_height: int = config["image_dimensions"]["tracker_stream"]["height"]
+            self.__tracker_stream_width: int = config["image_dimensions"]["tracker_stream"]["width"]
+
+            self.__stream_depth: int = config["image_dimensions"]["image_depth"]
+
         self.t_model = Model(0, 0, 0)
+
+        self.leaderboard_model = LeaderboardModel()
 
         self.live_visualization_model = ModelLV()
 
         self.app = QGuiApplication(sys.argv)
         self.engine = QQmlApplicationEngine()
-        self.stream_image_provider = StreamImageProvider()
+        self.tracker_stream_image_provider = StreamImageProvider(
+            self.__tracker_stream_width, self.__tracker_stream_height
+        )
+        self.stream_image_provider = StreamImageProvider(self.__vr_stream_width, self.__vr_stream_height)
 
+        self.engine.addImageProvider("tracker_stream", self.tracker_stream_image_provider)
         self.engine.addImageProvider("stream", self.stream_image_provider)
 
         self.engine.rootContext().setContextProperty("t_model", self.t_model)
         self.engine.rootContext().setContextProperty("live_visualization_model", self.live_visualization_model)
-        self.engine.load(resource_path() / "frontend/qml/main.qml")
+        self.engine.rootContext().setContextProperty("leaderboard_model", self.leaderboard_model)
+        self.engine.load(resource_path() / "live_visualization/frontend/qml/main.qml")
+
+        self._tracker_image_sub = pynng.Sub0()
+        self._tracker_image_sub.subscribe("")
+        self._tracker_image_sub.dial(self.__tracker_stream_receiver_address, block=False)
 
         self.image_sub = pynng.Sub0()
         self.image_sub.subscribe("")
-        self.image_sub.dial(IMAGE_SUB_ADDRESS, block=False)
+        self.image_sub.dial(self.__stream_receiver_address, block=False)
 
-        self.lap_sub = pynng.Sub0()
-        self.lap_sub.subscribe("")
-        self.lap_sub.dial(LAPTIME_SUB_ADDRESS, block=False)
+        self._lap_sub = pynng.Sub0()
+        self._lap_sub.subscribe("")
+        self._lap_sub.dial(self.__time_tracking_receiver_address, block=False)
+
+        self._leaderboard_sub = pynng.Sub0()
+        self._leaderboard_sub.subscribe("")
+        self._leaderboard_sub.dial(self.__leaderboard_receiver_address, block=False)
+
+        self._sound_status_sub = pynng.Sub0()
+        self._sound_status_sub.subscribe("")
+        self._sound_status_sub.dial(self.__sound_server_status_receiver_address, block=False)
+
+        self._tracker_image_socket_notifier = QSocketNotifier(self._tracker_image_sub.recv_fd, QSocketNotifier.Read)
+        self._tracker_image_socket_notifier.activated.connect(self.tracker_image_receiver_callback)
 
         self._image_socket_notifier = QSocketNotifier(self.image_sub.recv_fd, QSocketNotifier.Read)
         self._image_socket_notifier.activated.connect(self.image_receiver_callback)
 
-        self._lap_socket_notifier = QSocketNotifier(self.lap_sub.recv_fd, QSocketNotifier.Read)
+        self._lap_socket_notifier = QSocketNotifier(self._lap_sub.recv_fd, QSocketNotifier.Read)
         self._lap_socket_notifier.activated.connect(self.time_receiver)
+
+        self._leaderboard_socket_notifier = QSocketNotifier(self._leaderboard_sub.recv_fd, QSocketNotifier.Read)
+        self._leaderboard_socket_notifier.activated.connect(self.leaderboard_receiver)
+
+        self._sound_status_socket_notifier = QSocketNotifier(self._sound_status_sub.recv_fd, QSocketNotifier.Read)
+        self._sound_status_socket_notifier.activated.connect(self.sound_status_receiver)
 
         # timer for counting
         self.lapTimer = QTimer()
@@ -93,30 +145,50 @@ class LiveVisualization:
         self.timer_state = 0
 
     def run(self) -> None:
-        #try:
+        # try:
         if not self.engine.rootObjects():
             sys.exit(-1)
         print("started")
         self.app.exec()
-        #except:
-            #print("failed")
-            #pass
 
     def check_if_image_available_pynng(self) -> bool:
-        socket_list = [self.image_sub.recv_fd]
+        """
+        Check if an image is available on the pynng socket.
+
+        Returns:
+            bool: True if an image is available, False otherwise.
+        """
+
+        socket_list = [self._tracker_image_sub.recv_fd]
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [], 0)
-        return self.image_sub in read_sockets
+        return self._tracker_image_sub in read_sockets
+
+    def tracker_image_receiver_callback(self) -> None:
+        try:
+            data = self._tracker_image_sub.recv()
+            self.tracker_stream_image_provider.img = QImage(
+                data, self.__tracker_stream_width, self.__tracker_stream_height, QImage.Format_BGR888
+            )
+            self.live_visualization_model.reloadImage.emit()
+        except:
+            pass
 
     def image_receiver_callback(self) -> None:
         try:
             data = self.image_sub.recv()
-            self.stream_image_provider.img = QImage(data, IMAGE_WIDTH, IMAGE_HEIGHT, QImage.Format_RGB888)
+            self.stream_image_provider.img = QImage(
+                data, self.__vr_stream_width, self.__vr_stream_height, QImage.Format_RGB888
+            )
             self.live_visualization_model.reloadImage.emit()
         except:
             pass
 
     # the counter for the timer, basically the timer itself
     def lapTimer_callback(self) -> None:
+        """
+        Callback function for the lap timer. Updates the timer's timestamp.
+        """
+
         current_timestamp_ns = time.time_ns()
         self.diff = current_timestamp_ns - self.start_timestamp_ns
         self.t_model.set_timestamp(self.diff)
@@ -158,13 +230,20 @@ class LiveVisualization:
         self.timer_state = State.RESET
 
     def time_receiver(self) -> None:
-        msg = self.lap_sub.recv()
+        """
+        Receive time data.
+        """
+
+        msg = self._lap_sub.recv()
         decoded_data: str = msg.decode()
         i = decoded_data.find(" ")
         decoded_data = decoded_data[i + 1 :]
         data = json.loads(decoded_data)
+        print(data)
+
         if "lap_best_time" in data:
-            print("Lap started")
+            print("Lap started!")
+            # self.leaderboard_model.update_active_driver(data["current_driver"])
 
             self.t_model.set_best_time(int(data["lap_best_time"] * 1000000000))
             self.start_stop_button_clicked()
@@ -188,13 +267,10 @@ class LiveVisualization:
 
         if "lap_time" in data:
             self.reset_button_clicked()
-            print(data["lap_valid"])
             if data["lap_valid"]:
-                print(self.t_model.get_best_time_formatted())
-                print(data["lap_time"])
                 self.t_model.set_split_time(self.t_model.get_lap_time_difference(data["lap_time"] * 1000000000))
-                print(self.t_model.get_lap_time_difference(data["lap_time"]))
                 self.t_model.trigger_delta()
+                self.set_leaderboard(data["current_driver"], data["lap_time"])
 
     def _update_sector_color(self, sector, color) -> None:
         match sector:
@@ -204,6 +280,29 @@ class LiveVisualization:
                 self.t_model.set_second_sector_color(color)
             case 3:
                 self.t_model.set_third_sector_color(color)
+
+    def set_leaderboard(self, driver: str, time: float) -> None:
+        self.leaderboard_model.update_leaderboard({driver: time})
+
+    def leaderboard_receiver(self) -> None:
+        msg = self._leaderboard_sub.recv_msg()
+        decoded_data: str = msg.bytes.decode()
+        i = decoded_data.find(" ")
+        decoded_data = decoded_data[i + 1 :]
+        data = json.loads(decoded_data)
+        print("leaderboard_receiver() called")
+
+        self.leaderboard_model.update_leaderboard(data)
+
+    def sound_status_receiver(self) -> None:
+        msg = self._sound_status_sub.recv()
+        print(msg.decode())
+        if msg.decode() == "running":
+            self.live_visualization_model.soundStarted.emit()
+        elif msg.decode() == "stopped":
+            self.live_visualization_model.soundStopped.emit()
+        else:
+            print("Invalid status!")
 
 
 def main():
